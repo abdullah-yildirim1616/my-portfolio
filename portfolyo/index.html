@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdullah Yıldırım | Bilgisayar Mühendisi</title>
+    <!-- Tailwind CSS (Hızlı prototipleme için CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter (Okunabilirlik) ve Fira Code (Terminal için) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        neon: '#00f3ff', // Siber mavi
+                        matrix: '#00ff41', // Matrix yeşili
+                        darkest: '#050505',
+                        darker: '#111',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        /* Arka plan animasyonu için Canvas */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Glassmorphism (Cam Efekti) */
+        .glass-panel {
+            background: rgba(17, 17, 17, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Terminal Kursor Animasyonu */
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: #00f3ff;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Neon Text Glow */
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        /* Hover Glow Effect */
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+            border-color: rgba(0, 243, 255, 0.5);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-neon selection:text-black">
+
+    <!-- 3D Particle Network Arka Planı (Three.js vari bir etki için) -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigasyon (Glassmorphism) -->
+    <nav class="fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
+        <div class="glass-panel mx-auto max-w-5xl mt-4 rounded-full px-6 py-3 flex justify-between items-center">
+            <div class="font-mono text-neon font-bold text-xl tracking-tighter">
+                &lt;Abdullah Y. /&gt;
+            </div>
+            <div class="hidden md:flex gap-8 font-mono text-sm">
+                <a href="#about" class="hover:text-neon transition-colors">// about</a>
+                <a href="#projects" class="hover:text-neon transition-colors">// projects</a>
+                <a href="#articles" class="hover:text-neon transition-colors">// articles</a>
+            </div>
+            <a href="#contact" class="px-5 py-2 border border-neon text-neon rounded-full font-mono text-sm hover:bg-neon hover:text-black transition-all">
+                init_contact()
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero / Terminal Section -->
+    <section class="min-h-screen flex flex-col justify-center items-center px-4 pt-20">
+        <div class="w-full max-w-3xl glass-panel rounded-lg overflow-hidden relative">
+            <!-- Terminal Header -->
+            <div class="bg-darker px-4 py-2 border-b border-gray-800 flex gap-2 items-center">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <div class="font-mono text-xs text-gray-500 ml-4">abdullah@yildirim-server:~</div>
+            </div>
+            <!-- Terminal Body -->
+            <div class="p-6 font-mono text-sm md:text-base leading-relaxed h-[300px] md:h-[350px] overflow-y-auto" id="terminal-body">
+                <!-- İçerik JS ile yazdırılacak -->
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 animate-bounce text-gray-500">
+            <i class="fa-solid fa-arrow-down"></i>
+        </div>
+    </section>
+
+    <!-- About / Yetkinlikler (Bento Grid Tasarımı) -->
+    <section id="about" class="py-24 px-4 max-w-6xl mx-auto">
+        <h2 class="font-mono text-3xl md:text-4xl text-white mb-12 glow-text">01. <span class="text-neon">System_Architecture</span></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Ana Kutu -->
+            <div class="glass-panel hover-glow rounded-2xl p-8 md:col-span-2 flex flex-col justify-center">
+                <h3 class="text-2xl font-bold mb-4 text-white">Veriden Değer Üreten, Çözüm Odaklı Mühendis.</h3>
+                <p class="text-gray-400 mb-6">
+                    Karamanoğlu Mehmetbey Üniversitesi Bilgisayar Mühendisliği 4. sınıf öğrencisiyim. Veri Bilimi, Bilgisayarlı Görü ve Mobil Geliştirme (Flutter) alanlarında derinleşiyorum. Ayrıca ROTCAR Otomotiv'de edindiğim 2 yıllık endüstriyel deneyimle üretim hatlarında süreç optimizasyonu ve performans yönetimi için yazılım çözümleri üretiyorum.
+                </p>
+                <div class="flex flex-wrap gap-2 font-mono text-xs text-neon">
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">Python</span>
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">C/C++ & C#</span>
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">Java</span>
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">Flutter & Dart</span>
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">OpenCV & YOLO</span>
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">SQL & Firebase</span>
+                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">MATLAB</span>
+                </div>
+            </div>
+            
+            <!-- İstatistikler / Mini Kutu -->
+            <div class="glass-panel hover-glow rounded-2xl p-8 flex flex-col justify-center items-center text-center">
+                <i class="fa-solid fa-industry text-4xl text-matrix mb-4"></i>
+                <div class="text-4xl font-bold text-white mb-1">2 Yıl</div>
+                <div class="font-mono text-sm text-gray-500">Endüstriyel Deneyim</div>
+            </div>
+
+            <div class="glass-panel hover-glow rounded-2xl p-8 flex flex-col justify-center items-center text-center">
+                <i class="fa-solid fa-language text-4xl text-neon mb-4"></i>
+                <div class="text-4xl font-bold text-white mb-1">B2</div>
+                <div class="font-mono text-sm text-gray-500">İngilizce Seviyesi</div>
+            </div>
+
+            <div class="glass-panel hover-glow rounded-2xl p-8 md:col-span-2 flex flex-col justify-center text-center">
+                 <h3 class="font-mono text-xl text-white mb-2">Çok Yönlü Geliştirici (Full-Stack Mindset)</h3>
+                 <p class="text-gray-400 text-sm">Makine öğrenmesi modelleriyle anomali tespiti yapmaktan, Arduino ile robotik kodlamaya; Flutter ile mobil uygulama geliştirmekten Python soketleriyle ağ programlamaya kadar geniş bir teknik yelpazede projeler üretiyorum. Ayrıca IEEE ve Medium'da teknik makaleler yazıyorum.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projeler -->
+    <section id="projects" class="py-24 px-4 max-w-6xl mx-auto">
+        <h2 class="font-mono text-3xl md:text-4xl text-white mb-12 glow-text">02. <span class="text-neon">Deployed_Projects</span></h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Proje 1 -->
+            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
+                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
+                    <i class="fa-solid fa-shield-halved text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-white">Kredi Kartı Dolandırıcılığı Tespiti</h3>
+                        <div class="flex gap-3">
+                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Sınıf dengesizliği (imbalanced data) içeren veri setlerinde makine öğrenmesi modelleri (Scikit-learn) ile anomali tespiti. Sonuçlar IEEE formatında akademik makale olarak raporlanmıştır.</p>
+                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
+                        <span>#MachineLearning</span><span>#Python</span><span>#DataScience</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proje 2 -->
+            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
+                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
+                    <i class="fa-solid fa-camera-retro text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-white">YOLOv5 & OpenCV Görüntü İşleme</h3>
+                        <div class="flex gap-3">
+                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">PyTorch ve YOLOv5 mimarisi ile gerçek zamanlı videoda 6 farklı hayvan türünü yüksek doğrulukla tespit etme. OpenCV ile yüz/duygu analizi ve parmak sayma algoritmaları.</p>
+                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
+                        <span>#OpenCV</span><span>#YOLOv5</span><span>#PyTorch</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proje 3 -->
+            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
+                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
+                    <i class="fa-solid fa-mobile-screen text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-white">Anonim Chat Uygulaması</h3>
+                        <div class="flex gap-3">
+                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Flutter mimarisi ve Firebase (Auth & Realtime Database) entegrasyonu ile geliştirilen, uçtan uca şifreli ve yüksek performanslı mobil mesajlaşma platformu.</p>
+                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
+                        <span>#Flutter</span><span>#Dart</span><span>#Firebase</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proje 4 -->
+            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
+                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
+                    <i class="fa-solid fa-network-wired text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                </div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-white">Ağ İçi Dosya Transferi & Sohbet</h3>
+                        <div class="flex gap-3">
+                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">Python tabanlı soket programlama kullanılarak, aynı yerel ağdaki (LAN) cihazlar arasında çalışan yüksek performanslı veri iletimi ve mesajlaşma paneli.</p>
+                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
+                        <span>#Python</span><span>#Sockets</span><span>#Networking</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / İletişim -->
+    <section id="contact" class="py-24 px-4 text-center">
+        <h2 class="font-mono text-3xl md:text-4xl text-white mb-6 glow-text">03. <span class="text-neon">EOF</span></h2>
+        <p class="text-gray-400 max-w-lg mx-auto mb-10">Veri analizi, görüntü işleme, mobil uygulama geliştirme veya yeni bir sistem mimarisi hakkında konuşmak istersen benimle iletişime geçebilirsin.</p>
+        
+        <a href="mailto:abdullahyildirim.xyz@gmail.com" class="inline-block px-8 py-4 bg-neon/10 border border-neon text-neon rounded-[4px] font-mono text-lg hover:bg-neon hover:text-black hover:-translate-y-1 transition-all shadow-[0_0_15px_rgba(0,243,255,0.3)]">
+            [ Sinyal Gönder ]
+        </a>
+
+        <div class="mt-16 flex justify-center gap-6">
+            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-500 hover:text-neon transition-colors"><i class="fa-brands fa-github text-2xl"></i></a>
+            <a href="#" class="text-gray-500 hover:text-neon transition-colors"><i class="fa-brands fa-linkedin text-2xl"></i></a>
+            <a href="#" class="text-gray-500 hover:text-neon transition-colors"><i class="fa-brands fa-medium text-2xl"></i></a>
+        </div>
+        <p class="font-mono text-xs text-gray-600 mt-8">Tasarımlandı ve Kodlandı (Astro.js Vizyonuyla) © 2026 | Abdullah Yıldırım</p>
+    </section>
+
+    <!-- AI Terminal Chat Widget (YENİ EKLENEN KISIM) -->
+    <div id="ai-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <!-- Chat Paneli -->
+        <div id="ai-chat-panel" class="hidden glass-panel w-80 sm:w-96 rounded-xl border border-neon/30 overflow-hidden mb-4 shadow-[0_0_20px_rgba(0,243,255,0.2)] transform transition-all origin-bottom-right">
+            <div class="bg-darker px-4 py-3 border-b border-gray-800 flex justify-between items-center cursor-pointer" onclick="toggleChat()">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-neon animate-pulse"></i>
+                    <span class="font-mono text-sm text-gray-300 font-bold">Abdullah_AI_Asistan_v1.0</span>
+                </div>
+                <button class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="chat-messages" class="h-80 overflow-y-auto p-4 flex flex-col gap-3 font-mono text-xs sm:text-sm bg-[#0a0a0a]/80">
+                <div class="text-neon mb-2">
+                    > Sistem başlatıldı...<br>
+                    > Ben Abdullah'ın yapay zeka asistanıyım. Projeleri, yetenekleri veya deneyimleri hakkında bana sorular sorabilirsiniz. <span class="animate-pulse">_</span>
+                </div>
+            </div>
+
+            <div class="p-3 bg-darker border-t border-gray-800 flex gap-2">
+                <span class="text-neon font-mono mt-2">></span>
+                <input type="text" id="chat-input" class="w-full bg-transparent text-white font-mono text-sm focus:outline-none placeholder-gray-600" placeholder="Bir komut veya soru yazın..." autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Yüzen Buton -->
+        <button id="ai-chat-btn" onclick="toggleChat()" class="glass-panel w-14 h-14 rounded-full flex justify-center items-center text-neon border border-neon/50 hover:bg-neon hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(0,243,255,0.4)] group">
+            <i class="fa-solid fa-terminal text-xl group-hover:scale-110 transition-transform"></i>
+        </button>
+    </div>
+
+    <script>
+        /* 1. TERMINAL YAZI EFEKTİ (TYPING ANIMATION) */
+        const terminalBody = document.getElementById('terminal-body');
+        const commands = [
+            { text: "$ whoami", delay: 500, class: "text-neon" },
+            { text: "> Abdullah YILDIRIM | Bilgisayar Mühendisliği Öğrencisi (4. Sınıf)", delay: 300, class: "text-gray-300" },
+            { text: "$ cat yetenekler.txt", delay: 800, class: "text-neon" },
+            { text: "> Yükleniyor... [████████████] 100%", delay: 400, class: "text-matrix" },
+            { text: "> Python, C/C++, Java, Flutter, OpenCV, SQL, Veri Bilimi...", delay: 300, class: "text-gray-300" },
+            { text: "$ ./gelecek_hedefleri.sh", delay: 1000, class: "text-neon" },
+            { text: "> Yapay Zeka ve Veri Bilimi ile inovatif & ölçeklenebilir sistemler inşa etmek.", delay: 500, class: "text-white font-bold" }
+        ];
+
+        let commandIndex = 0;
+        
+        function typeLine(lineObj, callback) {
+            const lineDiv = document.createElement('div');
+            lineDiv.className = `mb-2 ${lineObj.class}`;
+            terminalBody.appendChild(lineDiv);
+            
+            let charIndex = 0;
+            const typingInterval = setInterval(() => {
+                lineDiv.innerHTML = lineObj.text.substring(0, charIndex) + '<span class="cursor"></span>';
+                charIndex++;
+                
+                if (charIndex > lineObj.text.length) {
+                    clearInterval(typingInterval);
+                    lineDiv.innerHTML = lineObj.text; // Kursoru sil
+                    setTimeout(callback, lineObj.delay);
+                }
+            }, 30); // Yazma hızı
+        }
+
+        function runTerminal() {
+            if (commandIndex < commands.length) {
+                typeLine(commands[commandIndex], () => {
+                    commandIndex++;
+                    runTerminal();
+                });
+            } else {
+                // Animasyon bitince kursoru en sona ekle
+                const finalCursor = document.createElement('div');
+                finalCursor.innerHTML = '<span class="text-neon">$</span> <span class="cursor"></span>';
+                terminalBody.appendChild(finalCursor);
+            }
+        }
+
+        // 1 saniye sonra terminali başlat
+        setTimeout(runTerminal, 1000);
+
+
+        /* 2. BACKGROUND PARTICLE NETWORK (Nöral Ağ / Sistem Etkisi) */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        const connectionDistance = 150; // Çizgilerin çekileceği mesafe
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 1.5 + 0.5;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                // Ekran dışına çıkarsa geri yansıt
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#00f3ff';
+                ctx.fill();
+            }
+        }
+
+        // Partikülleri oluştur (Telefonlarda az, PC'de fazla)
+        const particleCount = window.innerWidth < 768 ? 40 : 100;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        // Fare etkileşimi için
+        let mouse = { x: null, y: null };
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Partikülleri güncelle ve çiz
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // Diğer partiküllerle çizgi çiz
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < connectionDistance) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 243, 255, ${1 - distance/connectionDistance})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Fare ile etkileşim (Yakınsa çizgi çiz)
+                if (mouse.x != null) {
+                    let dxMouse = particles[i].x - mouse.x;
+                    let dyMouse = particles[i].y - mouse.y;
+                    let distanceMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+                    
+                    if (distanceMouse < 200) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 255, 65, ${1 - distanceMouse/200})`; // Mouse'a yaklaşınca matrix yeşili
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Fare ekrandan çıkınca
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        /* 3. GEMINI API ENTEGRASYONU & CHAT WIDGET */
+        const chatPanel = document.getElementById('ai-chat-panel');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        
+        let isChatOpen = false;
+        let chatHistory = [];
+
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            if (isChatOpen) {
+                chatPanel.classList.remove('hidden');
+                setTimeout(() => chatInput.focus(), 100);
+            } else {
+                chatPanel.classList.add('hidden');
+            }
+        }
+
+        // Abdullah'ın CV'sini içeren Sistem Talimatı (Prompt)
+        const systemPrompt = `Sen Abdullah Yıldırım'ın dijital portfolyosundaki resmi Yapay Zeka asistanısın. Adın 'Abdullah_AI_Asistan_v1.0'.
+Görev: Ziyaretçilerin Abdullah hakkında sorduğu sorulara kısa, net, profesyonel ama bir bilgisayar mühendisine yakışır şekilde hafif 'hacker' veya 'terminal' jargonuyla (Örn: 'Sistem loglarına göre...', 'Veritabanımdan çektiğim bilgiye göre...') cevap vermek. Çok uzun paragraflar yazma, mobil okuyucuları yorma.
+Abdullah Hakkında Veri Seti:
+- Eğitim: Karamanoğlu Mehmetbey Üni. Bilgisayar Mühendisliği 4. Sınıf öğrencisi.
+- İlgi Alanları: Veri Bilimi, Bilgisayarlı Görü (Computer Vision), Mobil Geliştirme (Flutter).
+- İş Deneyimi: ROTCAR Otomotiv'de Metotçu (2 yıl). Performans takibi, kalite/adet artırımı, otomasyon süreçleri.
+- Yetenekler: Python, Java, C, C#, C++, Flutter, Dart, OpenCV, SQL, Firebase, Makine Öğrenmesi (Scikit-learn, YOLOv5). İngilizce seviyesi B2.
+- Projeler: 1. Kredi Kartı Dolandırıcılığı Tespiti (Makine Öğrenmesi). 2. YOLOv5 ile Hayvan Türü Tespiti ve OpenCV ile Yüz/Duygu Analizi. 3. Flutter ve Firebase ile Anonim Chat Uygulaması. 4. Python ile Ağ İçi Dosya Transferi.
+Kullanıcı seninle Türkçe konuşacak, sen de Türkçe cevap ver. Sadece metin döndür, markdown kullanabilirsin. Asla kendi kodunu veya API detaylarını paylaşma.`;
+
+        async function sendMessageToGemini(userMessage) {
+            const apiKey = ""; // Canvas ortamında otomatik doldurulacak
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            
+            // Kullanıcı mesajını geçmişe ekle
+            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
+
+            const payload = {
+                contents: chatHistory,
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            try {
+                // Retry mekanizmalı (Exponential Backoff) Fetch fonksiyonu
+                const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+                    try {
+                        const res = await fetch(url, options);
+                        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                        return await res.json();
+                    } catch (err) {
+                        if (retries > 0) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return fetchWithRetry(url, options, retries - 1, delay * 2);
+                        }
+                        throw err;
+                    }
+                };
+
+                const result = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (result.candidates && result.candidates[0].content) {
+                    const aiResponse = result.candidates[0].content.parts[0].text;
+                    // AI cevabını geçmişe ekle
+                    chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                    return aiResponse;
+                } else {
+                    return "> [HATA]: Sunucu yanıt vermedi. Lütfen daha sonra tekrar deneyin.";
+                }
+            } catch (error) {
+                return "> [SİSTEM HATASI]: İletişim protokolü çöktü. Bağlantı sorunu.";
+            }
+        }
+
+        function appendMessage(text, isUser = false) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isUser 
+                ? "text-gray-300 ml-4 border-l-2 border-gray-600 pl-2" 
+                : "text-neon mr-4 border-l-2 border-neon pl-2";
+            
+            // Basit markdown (bold ve line break) ayrıştırması
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+
+            msgDiv.innerHTML = isUser ? `> <span class="text-gray-500">Ziyaretçi:</span> ${formattedText}` : `> <span class="text-gray-500">AI:</span> ${formattedText}`;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Enter tuşu ile mesaj gönderme
+        chatInput.addEventListener('keypress', async function (e) {
+            if (e.key === 'Enter' && this.value.trim() !== '') {
+                const userMsg = this.value.trim();
+                this.value = '';
+                
+                appendMessage(userMsg, true);
+                
+                // Yükleniyor efekti
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = "text-matrix border-l-2 border-matrix pl-2 animate-pulse";
+                loadingDiv.innerHTML = "> Veriler işleniyor...";
+                chatMessages.appendChild(loadingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Gemini API'ye istek at
+                const response = await sendMessageToGemini(userMsg);
+                
+                // Yükleniyor yazısını kaldır ve cevabı yaz
+                chatMessages.removeChild(loadingDiv);
+                appendMessage(response, false);
+            }
+        });
+    </script>
+</body>
+</html>
