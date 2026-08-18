@@ -1,593 +1,1006 @@
-<!DOCTYPE html>
-<html lang="tr" class="scroll-smooth">
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abdullah Yıldırım | Bilgisayar Mühendisi</title>
-    <!-- Tailwind CSS (Hızlı prototipleme için CDN) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter (Okunabilirlik) ve Fira Code (Terminal için) -->
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                    },
-                    colors: {
-                        neon: '#00f3ff', // Siber mavi
-                        matrix: '#00ff41', // Matrix yeşili
-                        darkest: '#050505',
-                        darker: '#111',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #050505;
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-        
-        /* Arka plan animasyonu için Canvas */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            opacity: 0.6;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#160912" />
+  <title>Abdullah ♥ Elif — Bizim Hikâyemiz</title>
+  <style>
+    :root{
+      --bg:#120812;
+      --bg2:#230d1d;
+      --card:rgba(255,255,255,.08);
+      --card-strong:rgba(255,255,255,.12);
+      --text:#fff8fb;
+      --muted:#d9b8c8;
+      --pink:#ff4f91;
+      --pink2:#ff82b4;
+      --rose:#ff174f;
+      --gold:#ffd27a;
+      --violet:#b780ff;
+      --shadow:0 25px 80px rgba(0,0,0,.35);
+      --radius:28px;
+    }
 
-        /* Glassmorphism (Cam Efekti) */
-        .glass-panel {
-            background: rgba(17, 17, 17, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-        }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(255,79,145,.17), transparent 26%),
+        radial-gradient(circle at 85% 18%, rgba(183,128,255,.12), transparent 28%),
+        radial-gradient(circle at 50% 86%, rgba(255,23,79,.12), transparent 30%),
+        linear-gradient(180deg,var(--bg),#0a050b 62%,#160812);
+      overflow-x:hidden;
+    }
 
-        /* Terminal Kursor Animasyonu */
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 20px;
-            background-color: #00f3ff;
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
+    body::before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none; z-index:-3;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 1.2px),
+        radial-gradient(circle, rgba(255,130,180,.7) 0 1px, transparent 1.2px);
+      background-size:52px 52px, 91px 91px;
+      background-position:0 0, 20px 17px;
+      opacity:.18;
+      animation:starDrift 28s linear infinite;
+    }
+    @keyframes starDrift{to{background-position:52px 104px,111px 199px}}
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+    ::selection{background:var(--pink);color:white}
+    button,input{font:inherit}
+    button{cursor:pointer}
 
-        /* Neon Text Glow */
-        .glow-text {
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-        }
+    .noise{
+      position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.035;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+    }
 
-        /* Hover Glow Effect */
-        .hover-glow:hover {
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-            border-color: rgba(0, 243, 255, 0.5);
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #050505;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00f3ff;
-        }
-    </style>
+    .floating-heart{
+      position:fixed; bottom:-60px; left:var(--x);
+      font-size:var(--s); opacity:0; pointer-events:none; z-index:-1;
+      filter:drop-shadow(0 5px 15px rgba(255,80,145,.25));
+      animation:floatUp var(--d) linear infinite;
+      animation-delay:var(--delay);
+    }
+    @keyframes floatUp{
+      0%{transform:translate3d(0,0,0) rotate(0deg) scale(.7);opacity:0}
+      10%{opacity:.65}
+      85%{opacity:.3}
+      100%{transform:translate3d(var(--drift),-115vh,0) rotate(280deg) scale(1.15);opacity:0}
+    }
+
+    .topbar{
+      position:fixed; top:18px; left:50%; transform:translateX(-50%);
+      z-index:80; width:min(920px,calc(100% - 28px));
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:10px 12px 10px 18px;
+      background:rgba(18,8,18,.66);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(18px);
+      border-radius:999px;
+      box-shadow:0 15px 50px rgba(0,0,0,.25);
+    }
+    .brand{font-weight:800;letter-spacing:.2px;white-space:nowrap}
+    .brand span{color:var(--pink2)}
+    .nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+    .nav a{
+      color:var(--muted); text-decoration:none; padding:9px 12px; border-radius:999px;
+      font-size:13px; transition:.2s ease;
+    }
+    .nav a:hover{background:rgba(255,255,255,.08);color:white}
+    .icon-btn{
+      border:none; width:42px;height:42px;border-radius:50%; color:white;
+      background:linear-gradient(135deg,rgba(255,79,145,.85),rgba(183,128,255,.85));
+      box-shadow:0 8px 30px rgba(255,79,145,.28); flex:none;
+      transition:transform .2s ease;
+    }
+    .icon-btn:hover{transform:scale(1.08) rotate(-4deg)}
+
+    .hero{
+      min-height:100svh; display:grid; place-items:center; text-align:center;
+      padding:140px 22px 80px; position:relative;
+    }
+    .hero-inner{width:min(1000px,100%);position:relative}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:9px;
+      padding:9px 14px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.055);border-radius:999px;color:#f7c9da;
+      font-size:14px;backdrop-filter:blur(12px);
+      animation:fadeUp .8s both;
+    }
+    .eyebrow .dot{
+      width:8px;height:8px;border-radius:50%;background:var(--pink);
+      box-shadow:0 0 18px var(--pink);animation:pulse 1.5s infinite;
+    }
+    @keyframes pulse{50%{transform:scale(1.55);opacity:.55}}
+    h1{
+      margin:24px auto 16px; max-width:950px;
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:clamp(50px,10vw,126px); line-height:.85; letter-spacing:-5px;
+      font-weight:500;
+      animation:fadeUp .9s .08s both;
+    }
+    h1 .amp{
+      display:inline-block; color:var(--pink); font-style:italic;
+      transform:translateY(-3px); text-shadow:0 0 50px rgba(255,79,145,.45);
+    }
+    .hero-sub{
+      max-width:700px;margin:0 auto;color:var(--muted);
+      font-size:clamp(17px,2.2vw,22px);line-height:1.7;
+      animation:fadeUp .9s .15s both;
+    }
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:34px;animation:fadeUp .9s .22s both}
+    .btn{
+      border:1px solid rgba(255,255,255,.13);
+      color:white;padding:14px 20px;border-radius:999px;
+      background:rgba(255,255,255,.07);backdrop-filter:blur(10px);
+      transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover{transform:translateY(-3px);background:rgba(255,255,255,.12)}
+    .btn.primary{
+      border:none;background:linear-gradient(135deg,var(--rose),var(--pink2));
+      box-shadow:0 12px 35px rgba(255,23,79,.27);
+    }
+    .btn.primary:hover{box-shadow:0 18px 45px rgba(255,23,79,.38)}
+    .hero-orbit{
+      width:min(600px,88vw);aspect-ratio:1;position:absolute;left:50%;top:50%;
+      transform:translate(-50%,-48%);z-index:-1;border:1px solid rgba(255,255,255,.05);
+      border-radius:50%;animation:spin 24s linear infinite;
+    }
+    .hero-orbit::before,.hero-orbit::after{
+      content:"♥";position:absolute;color:rgba(255,130,180,.65);
+      filter:drop-shadow(0 0 16px rgba(255,79,145,.5));font-size:24px;
+    }
+    .hero-orbit::before{left:13%;top:9%}
+    .hero-orbit::after{right:4%;bottom:24%;font-size:15px}
+    @keyframes spin{to{transform:translate(-50%,-48%) rotate(360deg)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+    .scrollhint{
+      position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+      color:#c89caf;font-size:12px;letter-spacing:2px;text-transform:uppercase;
+    }
+    .scrollhint::after{
+      content:"";display:block;width:1px;height:36px;margin:10px auto 0;
+      background:linear-gradient(var(--pink),transparent);animation:scrollLine 1.4s ease-in-out infinite;
+    }
+    @keyframes scrollLine{50%{height:52px;opacity:.45}}
+
+    main{position:relative}
+    section{padding:90px 20px}
+    .wrap{width:min(1120px,100%);margin:auto}
+    .section-head{margin-bottom:30px}
+    .kicker{color:var(--pink2);text-transform:uppercase;letter-spacing:2.8px;font-size:12px;font-weight:800}
+    h2{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(38px,6vw,72px);font-weight:500;letter-spacing:-2px;
+      margin:9px 0 12px;
+    }
+    .section-head p{color:var(--muted);max-width:700px;line-height:1.75;margin:0}
+
+    .glass{
+      background:linear-gradient(135deg,rgba(255,255,255,.095),rgba(255,255,255,.035));
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(16px);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+
+    .letter-layout{display:grid;grid-template-columns:1fr .8fr;gap:20px;align-items:stretch}
+    .letter{padding:34px;position:relative;overflow:hidden;min-height:440px}
+    .letter::after{
+      content:"“";position:absolute;right:22px;top:-28px;font-family:Georgia,serif;
+      font-size:220px;color:rgba(255,255,255,.04);
+    }
+    .letter p{color:#f7dfe9;font-size:17px;line-height:1.9;max-width:720px}
+    .signature{font-family:cursive;font-size:34px;color:var(--pink2);margin-top:26px}
+    .mini-card{padding:30px;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative;overflow:hidden}
+    .mini-card .big-heart{
+      font-size:92px;line-height:1;filter:drop-shadow(0 0 30px rgba(255,79,145,.42));
+      animation:heartbeat 1.25s infinite;
+    }
+    @keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.13)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}
+    .mini-card strong{font-size:24px;margin-top:14px}
+    .mini-card small{color:var(--muted);margin-top:8px;line-height:1.55}
+
+    .counter-card{padding:30px}
+    .date-row{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:18px}
+    .date-row p{margin:0;color:var(--muted)}
+    .date-input{
+      color:white;background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;
+      color-scheme:dark;
+    }
+    .counters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .count-box{padding:24px 12px;text-align:center;background:rgba(255,255,255,.055);border-radius:20px;border:1px solid rgba(255,255,255,.07)}
+    .count-box b{display:block;font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff}
+    .count-box span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.3px}
+
+    .reasons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .reason{
+      min-height:220px;padding:24px;position:relative;overflow:hidden;
+      transition:.3s ease;transform-style:preserve-3d;
+    }
+    .reason:hover{transform:translateY(-8px) rotateX(2deg);border-color:rgba(255,130,180,.35)}
+    .reason .num{font-size:12px;color:#ffb4cf;letter-spacing:2px}
+    .reason h3{font-family:Georgia,serif;font-size:27px;margin:18px 0 10px;font-weight:500}
+    .reason p{color:var(--muted);line-height:1.7;margin:0}
+    .reason .spark{position:absolute;right:18px;top:16px;font-size:28px;opacity:.25}
+
+    .timeline{position:relative;margin-top:36px}
+    .timeline::before{
+      content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;
+      background:linear-gradient(transparent,var(--pink),var(--violet),transparent);
+    }
+    .moment{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;margin:0 0 18px}
+    .moment:nth-child(even) .moment-card{grid-column:3}
+    .moment:nth-child(even) .moment-dot{grid-column:2}
+    .moment:nth-child(odd) .moment-card{grid-column:1}
+    .moment:nth-child(odd) .moment-dot{grid-column:2}
+    .moment-card{padding:24px}
+    .moment-card small{color:var(--pink2)}
+    .moment-card h3{font-size:21px;margin:7px 0}
+    .moment-card p{color:var(--muted);line-height:1.6;margin:0}
+    .moment-dot{
+      grid-row:1;justify-self:center;width:18px;height:18px;border-radius:50%;
+      background:var(--pink);border:5px solid #1b0a17;box-shadow:0 0 0 1px rgba(255,130,180,.45),0 0 24px rgba(255,79,145,.5);
+    }
+
+    .gallery-grid{display:grid;grid-template-columns:1.3fr .7fr .7fr;grid-auto-rows:230px;gap:13px}
+    .photo{
+      position:relative;overflow:hidden;border-radius:24px;border:1px solid rgba(255,255,255,.1);
+      background:
+        radial-gradient(circle at 25% 20%,rgba(255,130,180,.25),transparent 30%),
+        linear-gradient(135deg,#3b1730,#150914);
+    }
+    .photo:first-child{grid-row:span 2}
+    .photo img{width:100%;height:100%;object-fit:cover;display:none}
+    .photo.has-img img{display:block}
+    .photo.has-img .photo-placeholder{display:none}
+    .photo-placeholder{
+      position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#e5b8ca;
+    }
+    .photo-placeholder b{display:block;color:white;font-size:30px;margin-bottom:8px}
+    .photo input{display:none}
+    .photo label{
+      position:absolute;left:12px;bottom:12px;z-index:3;padding:9px 12px;border-radius:999px;
+      color:white;background:rgba(10,5,11,.58);backdrop-filter:blur(12px);font-size:12px;border:1px solid rgba(255,255,255,.15);
+      cursor:pointer;
+    }
+
+    .surprise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .surprise{
+      padding:26px;text-align:left;min-height:230px;border:none;color:white;
+      position:relative;overflow:hidden;transition:.25s;
+    }
+    .surprise:hover{transform:translateY(-7px) scale(1.01)}
+    .surprise .emoji{font-size:34px}
+    .surprise h3{font-size:22px;margin:18px 0 8px}
+    .surprise p{color:var(--muted);line-height:1.6;margin:0}
+    .surprise .arrow{position:absolute;right:22px;bottom:20px;font-size:20px;color:var(--pink2)}
+
+    .open-when{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .envelope-card{
+      padding:24px 18px;text-align:center;min-height:190px;display:flex;flex-direction:column;
+      justify-content:center;align-items:center;transition:.25s;
+    }
+    .envelope-card:hover{transform:rotate(-1.5deg) translateY(-6px)}
+    .envelope-card button{
+      margin-top:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);
+      color:white;padding:9px 13px;border-radius:999px;
+    }
+
+    .scratch-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .scratch-card{padding:22px}
+    .scratch-zone{
+      position:relative;height:260px;border-radius:22px;overflow:hidden;
+      display:grid;place-items:center;text-align:center;
+      background:radial-gradient(circle at 50% 40%,rgba(255,79,145,.28),transparent 32%),#1f0c1b;
+    }
+    .scratch-message{padding:25px;font-family:Georgia,serif;font-size:28px;line-height:1.4}
+    #scratchCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+    .scratch-card p{color:var(--muted);margin:14px 4px 0;line-height:1.6}
+    .wheel-card{padding:22px;display:flex;flex-direction:column}
+    .wheel{
+      width:220px;aspect-ratio:1;border-radius:50%;margin:8px auto 18px;
+      display:grid;place-items:center;text-align:center;padding:24px;
+      background:conic-gradient(#ff4f91 0 16.6%,#8d5dff 16.6% 33.2%,#ff174f 33.2% 49.8%,#ff9bc1 49.8% 66.4%,#7d4169 66.4% 83%,#d96dff 83% 100%);
+      border:8px solid rgba(255,255,255,.12);box-shadow:0 16px 45px rgba(0,0,0,.28);
+      transition:transform 2.7s cubic-bezier(.18,.73,.13,1);
+    }
+    .wheel span{
+      background:rgba(14,7,13,.72);backdrop-filter:blur(10px);padding:12px;border-radius:999px;
+      font-size:13px;max-width:150px;
+    }
+    .wheel-card .btn{align-self:center}
+
+    .promise{
+      text-align:center;padding:75px 22px;
+      background:
+        radial-gradient(circle at center,rgba(255,79,145,.18),transparent 35%);
+    }
+    .promise .rings{font-size:46px;letter-spacing:6px}
+    .promise blockquote{
+      margin:20px auto 0;max-width:800px;font-family:Georgia,serif;
+      font-size:clamp(25px,4vw,46px);line-height:1.35;font-style:italic;
+    }
+    .promise p{color:var(--muted)}
+
+    footer{text-align:center;padding:50px 20px 70px;color:#b98ca2}
+    footer .names{font-family:Georgia,serif;color:white;font-size:30px;margin-bottom:8px}
+
+    .modal{
+      position:fixed;inset:0;z-index:120;background:rgba(5,2,5,.72);backdrop-filter:blur(12px);
+      display:none;place-items:center;padding:20px;
+    }
+    .modal.show{display:grid;animation:fadeIn .22s ease both}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-card{
+      width:min(560px,100%);padding:30px;position:relative;text-align:center;
+      animation:pop .35s cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes pop{from{opacity:0;transform:scale(.86) translateY(20px)}to{opacity:1;transform:none}}
+    .modal-close{
+      position:absolute;right:14px;top:14px;width:38px;height:38px;border-radius:50%;
+      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:white;
+    }
+    .modal-card .modal-emoji{font-size:50px}
+    .modal-card h3{font-family:Georgia,serif;font-size:34px;margin:14px 0}
+    .modal-card p{color:#efd0dd;line-height:1.8;font-size:17px}
+
+    .intro{
+      position:fixed;inset:0;z-index:200;background:
+      radial-gradient(circle at 50% 45%,rgba(255,79,145,.22),transparent 30%),#0e060d;
+      display:grid;place-items:center;padding:20px;transition:opacity .8s ease, visibility .8s;
+    }
+    .intro.hide{opacity:0;visibility:hidden}
+    .intro-inner{text-align:center}
+    .intro .tiny{color:#eeb0c8;letter-spacing:3px;text-transform:uppercase;font-size:11px}
+    .intro h2{font-size:clamp(44px,9vw,95px);margin:10px 0 5px}
+    .intro .heart-trigger{
+      width:115px;height:115px;border-radius:50%;border:1px solid rgba(255,255,255,.13);
+      display:grid;place-items:center;margin:30px auto 14px;background:rgba(255,255,255,.05);
+      color:white;font-size:48px;box-shadow:0 0 55px rgba(255,79,145,.18);animation:heartbeat 1.25s infinite;
+    }
+    .intro p{color:var(--muted)}
+
+    #toast{
+      position:fixed;left:50%;bottom:24px;z-index:160;transform:translate(-50%,20px);
+      background:rgba(20,8,17,.88);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);
+      padding:12px 16px;border-radius:999px;color:white;opacity:0;pointer-events:none;transition:.25s;
+      max-width:calc(100% - 24px);text-align:center;
+    }
+    #toast.show{opacity:1;transform:translate(-50%,0)}
+
+    .cursor-heart{
+      position:fixed;z-index:150;pointer-events:none;font-size:14px;
+      animation:cursorPop .85s ease-out forwards;
+    }
+    @keyframes cursorPop{to{transform:translateY(-35px) scale(.2) rotate(30deg);opacity:0}}
+
+    .secret-overlay{
+      position:fixed;inset:0;z-index:190;display:none;place-items:center;text-align:center;padding:20px;
+      background:radial-gradient(circle,rgba(255,79,145,.3),rgba(7,3,7,.96) 60%);
+    }
+    .secret-overlay.show{display:grid;animation:fadeIn .4s}
+    .secret-overlay h3{font-family:Georgia,serif;font-size:clamp(46px,9vw,105px);margin:0}
+    .secret-overlay p{color:#f6cddd;font-size:18px}
+    .secret-overlay button{margin-top:18px}
+
+    .reveal{opacity:0;transform:translateY(26px);transition:.75s ease}
+    .reveal.visible{opacity:1;transform:none}
+
+    @media(max-width:850px){
+      .nav{display:none}
+      .letter-layout,.scratch-wrap{grid-template-columns:1fr}
+      .reasons-grid,.surprise-grid{grid-template-columns:1fr 1fr}
+      .open-when{grid-template-columns:1fr 1fr}
+      .gallery-grid{grid-template-columns:1fr 1fr;grid-auto-rows:200px}
+      .gallery-grid .photo:first-child{grid-row:span 1;grid-column:span 2}
+      .counters{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){
+      h1{letter-spacing:-2px}
+      section{padding:70px 16px}
+      .reasons-grid,.surprise-grid,.open-when{grid-template-columns:1fr}
+      .gallery-grid{grid-template-columns:1fr;grid-auto-rows:230px}
+      .gallery-grid .photo:first-child{grid-column:span 1}
+      .timeline::before{left:18px}
+      .moment{grid-template-columns:36px 1fr}
+      .moment:nth-child(n) .moment-dot{grid-column:1;grid-row:1;justify-self:start}
+      .moment:nth-child(n) .moment-card{grid-column:2}
+      .topbar{justify-content:space-between}
+      .brand{font-size:14px}
+      .hero{padding-top:120px}
+      .letter{padding:26px}
+    }
+  </style>
 </head>
-<body class="antialiased selection:bg-neon selection:text-black">
+<body>
+  <div class="noise"></div>
 
-    <!-- 3D Particle Network Arka Planı (Three.js vari bir etki için) -->
-    <canvas id="bg-canvas"></canvas>
-
-    <!-- Navigasyon (Glassmorphism) -->
-    <nav class="fixed w-full z-50 top-0 transition-all duration-300" id="navbar">
-        <div class="glass-panel mx-auto max-w-5xl mt-4 rounded-full px-6 py-3 flex justify-between items-center">
-            <div class="font-mono text-neon font-bold text-xl tracking-tighter">
-                &lt;Abdullah Y. /&gt;
-            </div>
-            <div class="hidden md:flex gap-8 font-mono text-sm">
-                <a href="#about" class="hover:text-neon transition-colors">// about</a>
-                <a href="#projects" class="hover:text-neon transition-colors">// projects</a>
-                <a href="#articles" class="hover:text-neon transition-colors">// articles</a>
-            </div>
-            <a href="#contact" class="px-5 py-2 border border-neon text-neon rounded-full font-mono text-sm hover:bg-neon hover:text-black transition-all">
-                init_contact()
-            </a>
-        </div>
-    </nav>
-
-    <!-- Hero / Terminal Section -->
-    <section class="min-h-screen flex flex-col justify-center items-center px-4 pt-20">
-        <div class="w-full max-w-3xl glass-panel rounded-lg overflow-hidden relative">
-            <!-- Terminal Header -->
-            <div class="bg-darker px-4 py-2 border-b border-gray-800 flex gap-2 items-center">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                <div class="font-mono text-xs text-gray-500 ml-4">abdullah@yildirim-server:~</div>
-            </div>
-            <!-- Terminal Body -->
-            <div class="p-6 font-mono text-sm md:text-base leading-relaxed h-[300px] md:h-[350px] overflow-y-auto" id="terminal-body">
-                <!-- İçerik JS ile yazdırılacak -->
-            </div>
-        </div>
-
-        <!-- Scroll Indicator -->
-        <div class="absolute bottom-10 animate-bounce text-gray-500">
-            <i class="fa-solid fa-arrow-down"></i>
-        </div>
-    </section>
-
-    <!-- About / Yetkinlikler (Bento Grid Tasarımı) -->
-    <section id="about" class="py-24 px-4 max-w-6xl mx-auto">
-        <h2 class="font-mono text-3xl md:text-4xl text-white mb-12 glow-text">01. <span class="text-neon">System_Architecture</span></h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Ana Kutu -->
-            <div class="glass-panel hover-glow rounded-2xl p-8 md:col-span-2 flex flex-col justify-center">
-                <h3 class="text-2xl font-bold mb-4 text-white">Veriden Değer Üreten, Çözüm Odaklı Mühendis.</h3>
-                <p class="text-gray-400 mb-6">
-                    Karamanoğlu Mehmetbey Üniversitesi Bilgisayar Mühendisliği 4. sınıf öğrencisiyim. Veri Bilimi, Bilgisayarlı Görü ve Mobil Geliştirme (Flutter) alanlarında derinleşiyorum. Ayrıca ROTCAR Otomotiv'de edindiğim 2 yıllık endüstriyel deneyimle üretim hatlarında süreç optimizasyonu ve performans yönetimi için yazılım çözümleri üretiyorum.
-                </p>
-                <div class="flex flex-wrap gap-2 font-mono text-xs text-neon">
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">Python</span>
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">C/C++ & C#</span>
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">Java</span>
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">Flutter & Dart</span>
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">OpenCV & YOLO</span>
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">SQL & Firebase</span>
-                    <span class="px-3 py-1 bg-neon/10 rounded-full border border-neon/30">MATLAB</span>
-                </div>
-            </div>
-            
-            <!-- İstatistikler / Mini Kutu -->
-            <div class="glass-panel hover-glow rounded-2xl p-8 flex flex-col justify-center items-center text-center">
-                <i class="fa-solid fa-industry text-4xl text-matrix mb-4"></i>
-                <div class="text-4xl font-bold text-white mb-1">2 Yıl</div>
-                <div class="font-mono text-sm text-gray-500">Endüstriyel Deneyim</div>
-            </div>
-
-            <div class="glass-panel hover-glow rounded-2xl p-8 flex flex-col justify-center items-center text-center">
-                <i class="fa-solid fa-language text-4xl text-neon mb-4"></i>
-                <div class="text-4xl font-bold text-white mb-1">B2</div>
-                <div class="font-mono text-sm text-gray-500">İngilizce Seviyesi</div>
-            </div>
-
-            <div class="glass-panel hover-glow rounded-2xl p-8 md:col-span-2 flex flex-col justify-center text-center">
-                 <h3 class="font-mono text-xl text-white mb-2">Çok Yönlü Geliştirici (Full-Stack Mindset)</h3>
-                 <p class="text-gray-400 text-sm">Makine öğrenmesi modelleriyle anomali tespiti yapmaktan, Arduino ile robotik kodlamaya; Flutter ile mobil uygulama geliştirmekten Python soketleriyle ağ programlamaya kadar geniş bir teknik yelpazede projeler üretiyorum. Ayrıca IEEE ve Medium'da teknik makaleler yazıyorum.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Projeler -->
-    <section id="projects" class="py-24 px-4 max-w-6xl mx-auto">
-        <h2 class="font-mono text-3xl md:text-4xl text-white mb-12 glow-text">02. <span class="text-neon">Deployed_Projects</span></h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Proje 1 -->
-            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
-                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
-                    <i class="fa-solid fa-shield-halved text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                </div>
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-white">Kredi Kartı Dolandırıcılığı Tespiti</h3>
-                        <div class="flex gap-3">
-                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-4">Sınıf dengesizliği (imbalanced data) içeren veri setlerinde makine öğrenmesi modelleri (Scikit-learn) ile anomali tespiti. Sonuçlar IEEE formatında akademik makale olarak raporlanmıştır.</p>
-                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
-                        <span>#MachineLearning</span><span>#Python</span><span>#DataScience</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Proje 2 -->
-            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
-                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
-                    <i class="fa-solid fa-camera-retro text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                </div>
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-white">YOLOv5 & OpenCV Görüntü İşleme</h3>
-                        <div class="flex gap-3">
-                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-4">PyTorch ve YOLOv5 mimarisi ile gerçek zamanlı videoda 6 farklı hayvan türünü yüksek doğrulukla tespit etme. OpenCV ile yüz/duygu analizi ve parmak sayma algoritmaları.</p>
-                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
-                        <span>#OpenCV</span><span>#YOLOv5</span><span>#PyTorch</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Proje 3 -->
-            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
-                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
-                    <i class="fa-solid fa-mobile-screen text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                </div>
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-white">Anonim Chat Uygulaması</h3>
-                        <div class="flex gap-3">
-                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-4">Flutter mimarisi ve Firebase (Auth & Realtime Database) entegrasyonu ile geliştirilen, uçtan uca şifreli ve yüksek performanslı mobil mesajlaşma platformu.</p>
-                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
-                        <span>#Flutter</span><span>#Dart</span><span>#Firebase</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Proje 4 -->
-            <div class="glass-panel hover-glow rounded-xl overflow-hidden group">
-                <div class="h-48 bg-gray-900 border-b border-gray-800 relative overflow-hidden flex justify-center items-center">
-                    <i class="fa-solid fa-network-wired text-6xl text-gray-700 group-hover:text-neon transition-colors duration-500"></i>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                </div>
-                <div class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-white">Ağ İçi Dosya Transferi & Sohbet</h3>
-                        <div class="flex gap-3">
-                            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-400 hover:text-neon"><i class="fa-brands fa-github text-xl"></i></a>
-                        </div>
-                    </div>
-                    <p class="text-gray-400 text-sm mb-4">Python tabanlı soket programlama kullanılarak, aynı yerel ağdaki (LAN) cihazlar arasında çalışan yüksek performanslı veri iletimi ve mesajlaşma paneli.</p>
-                    <div class="flex flex-wrap gap-2 font-mono text-xs text-matrix">
-                        <span>#Python</span><span>#Sockets</span><span>#Networking</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer / İletişim -->
-    <section id="contact" class="py-24 px-4 text-center">
-        <h2 class="font-mono text-3xl md:text-4xl text-white mb-6 glow-text">03. <span class="text-neon">EOF</span></h2>
-        <p class="text-gray-400 max-w-lg mx-auto mb-10">Veri analizi, görüntü işleme, mobil uygulama geliştirme veya yeni bir sistem mimarisi hakkında konuşmak istersen benimle iletişime geçebilirsin.</p>
-        
-        <a href="mailto:abdullahyildirim.xyz@gmail.com" class="inline-block px-8 py-4 bg-neon/10 border border-neon text-neon rounded-[4px] font-mono text-lg hover:bg-neon hover:text-black hover:-translate-y-1 transition-all shadow-[0_0_15px_rgba(0,243,255,0.3)]">
-            [ Sinyal Gönder ]
-        </a>
-
-        <div class="mt-16 flex justify-center gap-6">
-            <a href="https://github.com/abdullah-yildirim1616" target="_blank" class="text-gray-500 hover:text-neon transition-colors"><i class="fa-brands fa-github text-2xl"></i></a>
-            <a href="#" class="text-gray-500 hover:text-neon transition-colors"><i class="fa-brands fa-linkedin text-2xl"></i></a>
-            <a href="#" class="text-gray-500 hover:text-neon transition-colors"><i class="fa-brands fa-medium text-2xl"></i></a>
-        </div>
-        <p class="font-mono text-xs text-gray-600 mt-8">Tasarımlandı ve Kodlandı (Astro.js Vizyonuyla) © 2026 | Abdullah Yıldırım</p>
-    </section>
-
-    <!-- AI Terminal Chat Widget (YENİ EKLENEN KISIM) -->
-    <div id="ai-chat-widget" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        <!-- Chat Paneli -->
-        <div id="ai-chat-panel" class="hidden glass-panel w-80 sm:w-96 rounded-xl border border-neon/30 overflow-hidden mb-4 shadow-[0_0_20px_rgba(0,243,255,0.2)] transform transition-all origin-bottom-right">
-            <div class="bg-darker px-4 py-3 border-b border-gray-800 flex justify-between items-center cursor-pointer" onclick="toggleChat()">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-robot text-neon animate-pulse"></i>
-                    <span class="font-mono text-sm text-gray-300 font-bold">Abdullah_AI_Asistan_v1.0</span>
-                </div>
-                <button class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div id="chat-messages" class="h-80 overflow-y-auto p-4 flex flex-col gap-3 font-mono text-xs sm:text-sm bg-[#0a0a0a]/80">
-                <div class="text-neon mb-2">
-                    > Sistem başlatıldı...<br>
-                    > Ben Abdullah'ın yapay zeka asistanıyım. Projeleri, yetenekleri veya deneyimleri hakkında bana sorular sorabilirsiniz. <span class="animate-pulse">_</span>
-                </div>
-            </div>
-
-            <div class="p-3 bg-darker border-t border-gray-800 flex gap-2">
-                <span class="text-neon font-mono mt-2">></span>
-                <input type="text" id="chat-input" class="w-full bg-transparent text-white font-mono text-sm focus:outline-none placeholder-gray-600" placeholder="Bir komut veya soru yazın..." autocomplete="off">
-            </div>
-        </div>
-
-        <!-- Yüzen Buton -->
-        <button id="ai-chat-btn" onclick="toggleChat()" class="glass-panel w-14 h-14 rounded-full flex justify-center items-center text-neon border border-neon/50 hover:bg-neon hover:text-black transition-all duration-300 shadow-[0_0_15px_rgba(0,243,255,0.4)] group">
-            <i class="fa-solid fa-terminal text-xl group-hover:scale-110 transition-transform"></i>
-        </button>
+  <div class="intro" id="intro">
+    <div class="intro-inner">
+      <div class="tiny">Sadece iki kişi için hazırlanmış küçük bir evren</div>
+      <h2>Abdullah <span style="color:var(--pink)">♥</span> Elif</h2>
+      <button class="heart-trigger" id="enterBtn" aria-label="Hikâyeye gir">♥</button>
+      <p>Kalbe dokun. Hikâyemiz başlasın.</p>
     </div>
+  </div>
 
-    <script>
-        /* 1. TERMINAL YAZI EFEKTİ (TYPING ANIMATION) */
-        const terminalBody = document.getElementById('terminal-body');
-        const commands = [
-            { text: "$ whoami", delay: 500, class: "text-neon" },
-            { text: "> Abdullah YILDIRIM | Bilgisayar Mühendisliği Öğrencisi (4. Sınıf)", delay: 300, class: "text-gray-300" },
-            { text: "$ cat yetenekler.txt", delay: 800, class: "text-neon" },
-            { text: "> Yükleniyor... [████████████] 100%", delay: 400, class: "text-matrix" },
-            { text: "> Python, C/C++, Java, Flutter, OpenCV, SQL, Veri Bilimi...", delay: 300, class: "text-gray-300" },
-            { text: "$ ./gelecek_hedefleri.sh", delay: 1000, class: "text-neon" },
-            { text: "> Yapay Zeka ve Veri Bilimi ile inovatif & ölçeklenebilir sistemler inşa etmek.", delay: 500, class: "text-white font-bold" }
-        ];
+  <div class="topbar">
+    <div class="brand">A <span>♥</span> E</div>
+    <nav class="nav">
+      <a href="#mektup">Mektup</a>
+      <a href="#nedenler">Neden Sen?</a>
+      <a href="#anilar">Anılar</a>
+      <a href="#surpriz">Sürpriz</a>
+    </nav>
+    <button class="icon-btn" id="musicBtn" title="Müziği aç/kapat" aria-label="Müziği aç veya kapat">♫</button>
+  </div>
 
-        let commandIndex = 0;
-        
-        function typeLine(lineObj, callback) {
-            const lineDiv = document.createElement('div');
-            lineDiv.className = `mb-2 ${lineObj.class}`;
-            terminalBody.appendChild(lineDiv);
-            
-            let charIndex = 0;
-            const typingInterval = setInterval(() => {
-                lineDiv.innerHTML = lineObj.text.substring(0, charIndex) + '<span class="cursor"></span>';
-                charIndex++;
-                
-                if (charIndex > lineObj.text.length) {
-                    clearInterval(typingInterval);
-                    lineDiv.innerHTML = lineObj.text; // Kursoru sil
-                    setTimeout(callback, lineObj.delay);
-                }
-            }, 30); // Yazma hızı
+  <header class="hero">
+    <div class="hero-orbit"></div>
+    <div class="hero-inner">
+      <div class="eyebrow"><span class="dot"></span> iki kalp, tek hikâye</div>
+      <h1>Abdullah <span class="amp">&</span> Elif</h1>
+      <p class="hero-sub" id="typeText"></p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#mektup" style="text-decoration:none">Hikâyemize Gir ♥</a>
+        <button class="btn" id="randomLove">Bana Bir Şey Söyle</button>
+      </div>
+    </div>
+    <div class="scrollhint">aşağı kaydır</div>
+  </header>
+
+  <main>
+    <section id="mektup">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Elif'e küçük bir mektup</div>
+          <h2>İyi ki sen.</h2>
+          <p>Bazen bir insanın hayatına gelişi, bütün cümlelerin anlamını değiştirir. Bu sayfa da o değişimin küçük bir hatırası.</p>
+        </div>
+
+        <div class="letter-layout">
+          <article class="glass letter reveal">
+            <p>
+              Elif,<br><br>
+              Bu sayfada gördüğün her kalp, her ışık ve her küçük sürpriz aslında tek bir şeyi söylemek için burada:
+              <strong>hayatımda olduğun için çok mutluyum.</strong>
+            </p>
+            <p>
+              Seninle sıradan bir gün bile başka hissettiriyor. Birlikte güldüğümüz anlar, saçma şeylere takılıp kaldığımız dakikalar,
+              konuşmadan bile anlaşabildiğimiz o küçük anlar… Hepsi benim için birer hatıra değil, kendimi ait hissettiğim yerler.
+            </p>
+            <p>
+              Geleceğin ne getireceğini bilmiyorum; ama bildiğim bir şey var: aynı hikâyede seninle yan yana olmak,
+              her yeni sayfayı daha güzel yapıyor.
+            </p>
+            <div class="signature">— Abdullah</div>
+          </article>
+
+          <aside class="glass mini-card reveal">
+            <div class="big-heart">♥</div>
+            <strong>Bu kalp Elif için atıyor.</strong>
+            <small>Üzerine birkaç kez tıklamayı dene. Bazı şeyler ilk bakışta görünmez.</small>
+            <button class="btn" id="heartSecret" style="margin-top:18px">Kalbe Dokun</button>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="glass counter-card reveal">
+          <div class="date-row">
+            <div>
+              <div class="kicker">Bizim zamanımız</div>
+              <p>Başlangıç tarihinizi seç; sayaç o günden beri geçen zamanı hesaplasın.</p>
+            </div>
+            <input class="date-input" id="startDate" type="date" value="2025-01-01">
+          </div>
+          <div class="counters">
+            <div class="count-box"><b id="days">0</b><span>Gün</span></div>
+            <div class="count-box"><b id="hours">0</b><span>Saat</span></div>
+            <div class="count-box"><b id="minutes">0</b><span>Dakika</span></div>
+            <div class="count-box"><b id="seconds">0</b><span>Saniye</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="nedenler">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Neden sen?</div>
+          <h2>Sende sevdiğim şeyler.</h2>
+          <p>Bunlar sadece başlangıç. Kartların üzerine gel; küçük detaylar da sana eşlik etsin.</p>
+        </div>
+
+        <div class="reasons-grid">
+          <div class="glass reason reveal"><span class="spark">✦</span><span class="num">01</span><h3>Gülüşün</h3><p>Bir anda bütün günün havasını değiştirebilen, benim için dünyanın en tanıdık ve en güzel sesi gibi.</p></div>
+          <div class="glass reason reveal"><span class="spark">♡</span><span class="num">02</span><h3>Yanımda oluşun</h3><p>Bazen çözüm söylemeden, sadece orada olarak bile her şeyi daha hafif hale getiriyorsun.</p></div>
+          <div class="glass reason reveal"><span class="spark">☾</span><span class="num">03</span><h3>Bakışların</h3><p>Bazen tek bir bakışta uzun uzun konuşmuş gibi hissettiren o sessiz anlaşmalarımız.</p></div>
+          <div class="glass reason reveal"><span class="spark">∞</span><span class="num">04</span><h3>Biz oluşumuz</h3><p>İki ayrı insan olup yine de aynı yerde buluşabilmek. Benim en sevdiğim denklem.</p></div>
+          <div class="glass reason reveal"><span class="spark">✧</span><span class="num">05</span><h3>Detayların</h3><p>Belki başkasının fark etmeyeceği ama benim sende sevdiğim o küçük alışkanlıkların, mimiklerin, kelimelerin.</p></div>
+          <div class="glass reason reveal"><span class="spark">♥</span><span class="num">06</span><h3>Sen olman</h3><p>Hepsinden önemlisi: başka biri gibi olmaya çalışmadan, sadece Elif olduğun için.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="anilar">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Bizim küçük zaman çizgimiz</div>
+          <h2>Birlikte biriktirdiklerimiz.</h2>
+          <p>Aşağıdaki metinleri kendi gerçek tarihleriniz ve anılarınızla değiştirebilirsin. Dosya tek HTML olduğu için düzenlemesi de kolay.</p>
+        </div>
+
+        <div class="timeline">
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>Birinci bölüm</small><h3>İlk karşılaşma</h3><p>Her şeyin henüz “biz” olmadığı ama hikâyenin sessizce başladığı o gün.</p></div><div class="moment-dot"></div>
+          </div>
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>İkinci bölüm</small><h3>İlk uzun sohbet</h3><p>Zamanın nasıl geçtiğini fark etmediğimiz; bir konuşmanın diğerine karıştığı gecelerden biri.</p></div><div class="moment-dot"></div>
+          </div>
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>Üçüncü bölüm</small><h3>“Biz” olduğumuz an</h3><p>İki ayrı hikâyenin aynı cümlede buluştuğu bölüm.</p></div><div class="moment-dot"></div>
+          </div>
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>Devam ediyor…</small><h3>Bugün</h3><p>Hikâyenin en güzel yanı: henüz bitmiş olmaması.</p></div><div class="moment-dot"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="fotograflar">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Bizden kareler</div>
+          <h2>Fotoğraflarımız.</h2>
+          <p>Her kutudaki “Fotoğraf ekle” düğmesine basıp kendi fotoğraflarınızı seçebilirsiniz. Görseller sadece tarayıcıda açılır; hiçbir yere yüklenmez.</p>
+        </div>
+
+        <div class="gallery-grid">
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>♡</b>En sevdiğiniz fotoğrafı buraya koyun</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>✦</b>Bir anı daha</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>☾</b>Bir gece, bir gülüş</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>∞</b>Birlikte</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>♥</b>Biz</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="surpriz">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Dokun ve aç</div>
+          <h2>Küçük sürprizler.</h2>
+          <p>Bazı cümleler saklanınca daha güzel oluyor.</p>
+        </div>
+
+        <div class="surprise-grid">
+          <button class="glass surprise reveal" data-modal="s1"><span class="emoji">🌙</span><h3>Gece mesajı</h3><p>Uykudan önce açılmak üzere saklanmış küçük bir cümle.</p><span class="arrow">↗</span></button>
+          <button class="glass surprise reveal" data-modal="s2"><span class="emoji">💌</span><h3>Acil sevgi dozu</h3><p>Kötü bir gün geçiriyorsan özellikle buraya bas.</p><span class="arrow">↗</span></button>
+          <button class="glass surprise reveal" data-modal="s3"><span class="emoji">✨</span><h3>Gelecekten not</h3><p>Bir gün dönüp baktığımızda hatırlamamız gereken şey.</p><span class="arrow">↗</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">“Şu zaman aç” mektupları</div>
+          <h2>İhtiyacın olduğunda.</h2>
+        </div>
+        <div class="open-when">
+          <div class="glass envelope-card reveal"><div style="font-size:38px">☁️</div><b>Kötü bir gün geçirdiğinde</b><button data-open="bad">Aç</button></div>
+          <div class="glass envelope-card reveal"><div style="font-size:38px">🥹</div><b>Beni özlediğinde</b><button data-open="miss">Aç</button></div>
+          <div class="glass envelope-card reveal"><div style="font-size:38px">😂</div><b>Gülmek istediğinde</b><button data-open="laugh">Aç</button></div>
+          <div class="glass envelope-card reveal"><div style="font-size:38px">🫶</div><b>Kendinden şüphe ettiğinde</b><button data-open="doubt">Aç</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="scratch-wrap">
+          <div class="glass scratch-card reveal">
+            <div class="section-head" style="margin-bottom:18px">
+              <div class="kicker">Kazı ve keşfet</div>
+              <h2 style="font-size:42px">Gizli mesaj</h2>
+            </div>
+            <div class="scratch-zone" id="scratchZone">
+              <div class="scratch-message">“Seni seçtiğim için değil, her gün yeniden seçmek istediğim için seviyorum.”</div>
+              <canvas id="scratchCanvas"></canvas>
+            </div>
+            <p>Fareyle veya parmağınla gri yüzeyi kazı. Altındaki mesaj tamamen sana ait.</p>
+          </div>
+
+          <div class="glass wheel-card reveal">
+            <div class="section-head" style="margin-bottom:12px">
+              <div class="kicker">Bugünün mini kararı</div>
+              <h2 style="font-size:42px">Aşk çarkı</h2>
+            </div>
+            <div class="wheel" id="wheel"><span id="wheelText">Çarkı çevir ♥</span></div>
+            <button class="btn primary" id="spinBtn">Bugün ne yapıyoruz?</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="promise reveal">
+      <div class="wrap">
+        <div class="rings">∞ ♥ ∞</div>
+        <blockquote>
+          “Hikâyemizin en sevdiğim kısmı geçmişimiz değil; birlikte yazacağımız bütün o boş sayfalar.”
+        </blockquote>
+        <p>Abdullah → Elif</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="names">Abdullah ♥ Elif</div>
+    <div>Bir HTML dosyasına sığdırılmış kocaman bir “iyi ki”.</div>
+    <div style="margin-top:8px;font-size:12px;opacity:.75">Kalbe 7 kez dokunmayı unutma.</div>
+  </footer>
+
+  <div class="modal" id="modal">
+    <div class="glass modal-card">
+      <button class="modal-close" id="modalClose">×</button>
+      <div class="modal-emoji" id="modalEmoji">💌</div>
+      <h3 id="modalTitle">Başlık</h3>
+      <p id="modalText">Mesaj</p>
+    </div>
+  </div>
+
+  <div class="secret-overlay" id="secretOverlay">
+    <div>
+      <div style="font-size:70px;animation:heartbeat 1.2s infinite">♥</div>
+      <h3>ELİF + ABDULLAH</h3>
+      <p>Gizli bölüm bulundu. Resmî sonuç: Bu hikâyede kalpler aynı tarafta.</p>
+      <button class="btn primary" id="closeSecret">Bizim hikâyemize dön</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // -----------------------------
+    // 1) Arka plandaki uçuşan kalpler
+    // -----------------------------
+    const hearts = ["♥","♡","❤","✦"];
+    for(let i=0;i<22;i++){
+      const h=document.createElement("div");
+      h.className="floating-heart";
+      h.textContent=hearts[Math.floor(Math.random()*hearts.length)];
+      h.style.setProperty("--x",Math.random()*100+"vw");
+      h.style.setProperty("--s",(10+Math.random()*20)+"px");
+      h.style.setProperty("--d",(11+Math.random()*18)+"s");
+      h.style.setProperty("--delay",(-Math.random()*25)+"s");
+      h.style.setProperty("--drift",(-80+Math.random()*160)+"px");
+      h.style.color=Math.random()>.35?"#ff6ea5":"#c792ff";
+      document.body.appendChild(h);
+    }
+
+    // -----------------------------
+    // 2) Açılış ekranı
+    // -----------------------------
+    const intro=document.getElementById("intro");
+    document.getElementById("enterBtn").addEventListener("click",()=>{
+      intro.classList.add("hide");
+      burst(window.innerWidth/2,window.innerHeight/2,34);
+      setTimeout(()=>document.getElementById("typeText").classList.add("ready"),300);
+    });
+
+    // -----------------------------
+    // 3) Yazı yazma efekti
+    // -----------------------------
+    const sentence="Bazı insanlar hayatına gelir. Bazılarıysa hayatının anlamını değiştirir. Elif, benim için ikinci cümlesin.";
+    const typeEl=document.getElementById("typeText");
+    let ti=0;
+    function typeWriter(){
+      if(ti<=sentence.length){
+        typeEl.textContent=sentence.slice(0,ti++);
+        setTimeout(typeWriter, ti<55 ? 34 : 24);
+      }
+    }
+    setTimeout(typeWriter,900);
+
+    // -----------------------------
+    // 4) Scroll ile görünme animasyonu
+    // -----------------------------
+    const observer=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add("visible");
+          observer.unobserve(e.target);
         }
+      })
+    },{threshold:.12});
+    document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
 
-        function runTerminal() {
-            if (commandIndex < commands.length) {
-                typeLine(commands[commandIndex], () => {
-                    commandIndex++;
-                    runTerminal();
-                });
-            } else {
-                // Animasyon bitince kursoru en sona ekle
-                const finalCursor = document.createElement('div');
-                finalCursor.innerHTML = '<span class="text-neon">$</span> <span class="cursor"></span>';
-                terminalBody.appendChild(finalCursor);
-            }
+    // -----------------------------
+    // 5) Birlikte geçen süre sayacı
+    // -----------------------------
+    const startInput=document.getElementById("startDate");
+    const savedDate=localStorage.getItem("ae-start-date");
+    if(savedDate) startInput.value=savedDate;
+
+    function updateCounter(){
+      const raw=startInput.value;
+      if(!raw) return;
+      const start=new Date(raw+"T00:00:00");
+      let diff=Math.max(0,Date.now()-start.getTime());
+      const sec=Math.floor(diff/1000);
+      document.getElementById("days").textContent=Math.floor(sec/86400).toLocaleString("tr-TR");
+      document.getElementById("hours").textContent=Math.floor((sec%86400)/3600);
+      document.getElementById("minutes").textContent=Math.floor((sec%3600)/60);
+      document.getElementById("seconds").textContent=sec%60;
+    }
+    startInput.addEventListener("change",()=>{
+      localStorage.setItem("ae-start-date",startInput.value);
+      updateCounter();
+      toast("Başlangıç tarihi kaydedildi ♥");
+    });
+    updateCounter(); setInterval(updateCounter,1000);
+
+    // -----------------------------
+    // 6) Fotoğraf kutuları
+    // -----------------------------
+    document.querySelectorAll(".photo input").forEach(input=>{
+      input.addEventListener("change",()=>{
+        const file=input.files?.[0];
+        if(!file) return;
+        const photo=input.closest(".photo");
+        const img=photo.querySelector("img");
+        img.src=URL.createObjectURL(file);
+        photo.classList.add("has-img");
+        toast("Fotoğraf eklendi. Güzel seçim ♥");
+      });
+    });
+
+    // -----------------------------
+    // 7) Modal mesajları
+    // -----------------------------
+    const modal=document.getElementById("modal");
+    const modalEmoji=document.getElementById("modalEmoji");
+    const modalTitle=document.getElementById("modalTitle");
+    const modalText=document.getElementById("modalText");
+
+    const messages={
+      s1:["🌙","İyi geceler, Elif","Bugün nasıl geçmiş olursa olsun, günün son düşüncelerinden birinin seni çok seven bir Abdullah olduğunu bil. Uyu, dinlen; yarın yine birlikte güzelleştireceğimiz bir gün var."],
+      s2:["💌","Acil sevgi dozu","Şu an moralin düşükse tek görevin şu: kendine benim gözümden bakmayı dene. O zaman ne kadar güzel, özel ve değerli biri olduğunu biraz daha net görürsün."],
+      s3:["✨","Gelecekten küçük bir not","Bir gün bu sayfayı çok sonra yeniden açarsak, bugünkü halimize gülümseyelim. Çünkü şu anda henüz yaşayacağımız en güzel anıların çoğunu yaşamış bile değiliz."],
+      bad:["☁️","Bugün zor geçtiyse…","Bugün her şeyi çözmek zorunda değilsin. Biraz dinlen, biraz nefes al ve şunu hatırla: kötü bir gün, kötü bir hayat demek değildir. Ben yanındayım."],
+      miss:["🥹","Beni özlediğinde","Ekrana biraz yaklaş. Şimdi hayal et: sana sarılıyorum ve 'ben de seni özledim Elif' diyorum. Gerçek sarılmanın yerini tutmaz ama sıra ona da gelecek."],
+      laugh:["😂","Gülmek istediğinde","Abdullah tarafından yapılan çok ciddi bir bilimsel araştırmaya göre Elif gülünce ortamın güzellik seviyesi %847 artıyor. Kaynak: Abdullah. Hakemli dergi: Kalbim."],
+      doubt:["🫶","Kendinden şüphe ettiğinde","Sen yalnızca başarıların kadar değerli değilsin. Yorulduğunda, hata yaptığında, hiçbir şey yapmak istemediğinde de aynı Elif'sin. Ve ben o Elif'i de seviyorum."]
+    };
+
+    function showModal(key){
+      const [emoji,title,text]=messages[key];
+      modalEmoji.textContent=emoji;
+      modalTitle.textContent=title;
+      modalText.textContent=text;
+      modal.classList.add("show");
+      burst(window.innerWidth/2,window.innerHeight/2,14);
+    }
+    document.querySelectorAll("[data-modal]").forEach(b=>b.onclick=()=>showModal(b.dataset.modal));
+    document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>showModal(b.dataset.open));
+    document.getElementById("modalClose").onclick=()=>modal.classList.remove("show");
+    modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
+
+    // -----------------------------
+    // 8) Rastgele romantik cümle
+    // -----------------------------
+    const loveLines=[
+      "Elif, bugün de en sevdiğim tesadüfsün.",
+      "Bazen ev dediğin şey bir yer değil, bir insandır.",
+      "Seninle konuşmak, günün en sevdiğim kısmı olabilir.",
+      "Dünyada milyarlarca insan var; benim cümlem yine sana çıkıyor.",
+      "En güzel plan: sen + ben + biraz zaman.",
+      "Sana alışmadım; seni her gün biraz daha sevdim.",
+      "Birlikteyken zaman hızlı, özleyince yavaş."
+    ];
+    document.getElementById("randomLove").onclick=()=>{
+      const line=loveLines[Math.floor(Math.random()*loveLines.length)];
+      toast(line,3300); burst(window.innerWidth/2,window.innerHeight*.55,18);
+    };
+
+    // -----------------------------
+    // 9) Kalp sırrı — 7 tık
+    // -----------------------------
+    let heartClicks=0;
+    document.getElementById("heartSecret").onclick=(e)=>{
+      heartClicks++;
+      const r=e.currentTarget.getBoundingClientRect();
+      burst(r.left+r.width/2,r.top+r.height/2,10);
+      if(heartClicks<7) toast(`Kalp ${heartClicks}/7… devam et ♥`,900);
+      if(heartClicks===7){
+        document.getElementById("secretOverlay").classList.add("show");
+        fireworks();
+      }
+    };
+    document.getElementById("closeSecret").onclick=()=>document.getElementById("secretOverlay").classList.remove("show");
+
+    // Klavyeden "elif" yazılırsa ikinci easter egg
+    let typed="";
+    window.addEventListener("keydown",e=>{
+      if(e.key.length===1){
+        typed=(typed+e.key.toLowerCase()).slice(-4);
+        if(typed==="elif"){
+          toast("Gizli kelime bulundu: ELİF ♥",2500);
+          fireworks();
         }
+      }
+      if(e.key==="Escape"){
+        modal.classList.remove("show");
+        document.getElementById("secretOverlay").classList.remove("show");
+      }
+    });
 
-        // 1 saniye sonra terminali başlat
-        setTimeout(runTerminal, 1000);
+    // -----------------------------
+    // 10) Fare imlecinde mini kalpler
+    // -----------------------------
+    let lastTrail=0;
+    window.addEventListener("pointermove",e=>{
+      const now=performance.now();
+      if(now-lastTrail<90) return;
+      lastTrail=now;
+      if(Math.random()<.65){
+        const s=document.createElement("span");
+        s.className="cursor-heart";
+        s.textContent=Math.random()>.3?"♥":"✦";
+        s.style.left=e.clientX+"px"; s.style.top=e.clientY+"px";
+        s.style.color=Math.random()>.35?"#ff78ad":"#c894ff";
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),900);
+      }
+    });
 
+    // -----------------------------
+    // 11) Konfeti / kalp patlaması
+    // -----------------------------
+    function burst(x,y,count=20){
+      for(let i=0;i<count;i++){
+        const p=document.createElement("span");
+        p.textContent=Math.random()>.28?"♥":"✦";
+        p.style.position="fixed";
+        p.style.left=x+"px";p.style.top=y+"px";p.style.zIndex=180;p.style.pointerEvents="none";
+        p.style.color=Math.random()>.35?"#ff5d99":"#ffd0e2";
+        p.style.fontSize=(9+Math.random()*15)+"px";
+        document.body.appendChild(p);
+        const a=Math.random()*Math.PI*2, dist=60+Math.random()*150;
+        const dx=Math.cos(a)*dist,dy=Math.sin(a)*dist-40;
+        p.animate([
+          {transform:"translate(-50%,-50%) scale(.4) rotate(0deg)",opacity:1},
+          {transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.1) rotate(${Math.random()*360}deg)`,opacity:0}
+        ],{duration:900+Math.random()*900,easing:"cubic-bezier(.2,.8,.2,1)"});
+        setTimeout(()=>p.remove(),1900);
+      }
+    }
+    function fireworks(){
+      const spots=[
+        [innerWidth*.2,innerHeight*.3],
+        [innerWidth*.8,innerHeight*.28],
+        [innerWidth*.5,innerHeight*.45],
+        [innerWidth*.28,innerHeight*.7],
+        [innerWidth*.72,innerHeight*.68]
+      ];
+      spots.forEach((s,i)=>setTimeout(()=>burst(s[0],s[1],35),i*220));
+    }
 
-        /* 2. BACKGROUND PARTICLE NETWORK (Nöral Ağ / Sistem Etkisi) */
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        
-        let width, height;
-        let particles = [];
-        const connectionDistance = 150; // Çizgilerin çekileceği mesafe
+    // -----------------------------
+    // 12) Kazı-kazan alanı
+    // -----------------------------
+    const canvas=document.getElementById("scratchCanvas");
+    const zone=document.getElementById("scratchZone");
+    const ctx=canvas.getContext("2d");
+    let scratching=false;
 
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+    function setupScratch(){
+      const rect=zone.getBoundingClientRect();
+      const dpr=Math.min(devicePixelRatio||1,2);
+      canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const g=ctx.createLinearGradient(0,0,rect.width,rect.height);
+      g.addColorStop(0,"#743c61");g.addColorStop(.5,"#b8688d");g.addColorStop(1,"#5b2a51");
+      ctx.fillStyle=g;ctx.fillRect(0,0,rect.width,rect.height);
+      ctx.fillStyle="rgba(255,255,255,.88)";
+      ctx.textAlign="center";ctx.font="700 18px system-ui";
+      ctx.fillText("BURAYI KAZI ♥",rect.width/2,rect.height/2);
+    }
+    function scratchAt(e){
+      const rect=canvas.getBoundingClientRect();
+      const x=e.clientX-rect.left,y=e.clientY-rect.top;
+      ctx.save();ctx.globalCompositeOperation="destination-out";
+      ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+    canvas.addEventListener("pointerdown",e=>{scratching=true;canvas.setPointerCapture(e.pointerId);scratchAt(e)});
+    canvas.addEventListener("pointermove",e=>{if(scratching)scratchAt(e)});
+    canvas.addEventListener("pointerup",()=>scratching=false);
+    canvas.addEventListener("pointercancel",()=>scratching=false);
+    setupScratch();
+    window.addEventListener("resize",setupScratch);
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.radius = Math.random() * 1.5 + 0.5;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                // Ekran dışına çıkarsa geri yansıt
-                if (this.x < 0 || this.x > width) this.vx = -this.vx;
-                if (this.y < 0 || this.y > height) this.vy = -this.vy;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#00f3ff';
-                ctx.fill();
-            }
-        }
+    // -----------------------------
+    // 13) Aşk çarkı
+    // -----------------------------
+    const wheel=document.getElementById("wheel");
+    const wheelText=document.getElementById("wheelText");
+    const wheelChoices=[
+      "Birlikte kahve ☕","Uzun yürüyüş 🌙","Film gecesi 🎬",
+      "Tatlı kaçamağı 🍰","Bol bol sarılma 🫂","Sürpriz plan ✨"
+    ];
+    let rotation=0;
+    document.getElementById("spinBtn").onclick=()=>{
+      const choice=wheelChoices[Math.floor(Math.random()*wheelChoices.length)];
+      rotation+=1080+Math.floor(Math.random()*720);
+      wheel.style.transform=`rotate(${rotation}deg)`;
+      wheelText.style.opacity=.25;
+      setTimeout(()=>{
+        wheelText.textContent=choice;
+        wheelText.style.opacity=1;
+        toast("Karar verildi: "+choice,2600);
+        const r=wheel.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,20);
+      },2600);
+    };
 
-        // Partikülleri oluştur (Telefonlarda az, PC'de fazla)
-        const particleCount = window.innerWidth < 768 ? 40 : 100;
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
-        }
+    // -----------------------------
+    // 14) Tıkla çalan minimal romantik melodi
+    // Web Audio kullandığı için harici müzik dosyası gerekmez.
+    // -----------------------------
+    let audioCtx=null, musicTimer=null, musicOn=false, noteIndex=0;
+    const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23,440,523.25,440,349.23];
+    function playNote(freq){
+      if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      const osc=audioCtx.createOscillator();
+      const gain=audioCtx.createGain();
+      const filter=audioCtx.createBiquadFilter();
+      osc.type="sine";osc.frequency.value=freq;
+      filter.type="lowpass";filter.frequency.value=1300;
+      gain.gain.setValueAtTime(.0001,audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.045,audioCtx.currentTime+.04);
+      gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.7);
+      osc.connect(filter);filter.connect(gain);gain.connect(audioCtx.destination);
+      osc.start();osc.stop(audioCtx.currentTime+.72);
+    }
+    function musicTick(){playNote(notes[noteIndex++%notes.length]);}
+    document.getElementById("musicBtn").onclick=()=>{
+      musicOn=!musicOn;
+      const btn=document.getElementById("musicBtn");
+      if(musicOn){
+        musicTick();musicTimer=setInterval(musicTick,520);btn.textContent="♪";
+        toast("Küçük melodi açıldı ♪");
+      }else{
+        clearInterval(musicTimer);btn.textContent="♫";toast("Melodi kapatıldı");
+      }
+    };
 
-        // Fare etkileşimi için
-        let mouse = { x: null, y: null };
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
-        });
-
-        function animate() {
-            ctx.clearRect(0, 0, width, height);
-            
-            // Partikülleri güncelle ve çiz
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                
-                // Diğer partiküllerle çizgi çiz
-                for (let j = i; j < particles.length; j++) {
-                    let dx = particles[i].x - particles[j].x;
-                    let dy = particles[i].y - particles[j].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < connectionDistance) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 243, 255, ${1 - distance/connectionDistance})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
-                }
-
-                // Fare ile etkileşim (Yakınsa çizgi çiz)
-                if (mouse.x != null) {
-                    let dxMouse = particles[i].x - mouse.x;
-                    let dyMouse = particles[i].y - mouse.y;
-                    let distanceMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-                    
-                    if (distanceMouse < 200) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(0, 255, 65, ${1 - distanceMouse/200})`; // Mouse'a yaklaşınca matrix yeşili
-                        ctx.lineWidth = 1;
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(mouse.x, mouse.y);
-                        ctx.stroke();
-                    }
-                }
-            }
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // Fare ekrandan çıkınca
-        window.addEventListener('mouseout', () => {
-            mouse.x = null;
-            mouse.y = null;
-        });
-
-        /* 3. GEMINI API ENTEGRASYONU & CHAT WIDGET */
-        const chatPanel = document.getElementById('ai-chat-panel');
-        const chatInput = document.getElementById('chat-input');
-        const chatMessages = document.getElementById('chat-messages');
-        
-        let isChatOpen = false;
-        let chatHistory = [];
-
-        function toggleChat() {
-            isChatOpen = !isChatOpen;
-            if (isChatOpen) {
-                chatPanel.classList.remove('hidden');
-                setTimeout(() => chatInput.focus(), 100);
-            } else {
-                chatPanel.classList.add('hidden');
-            }
-        }
-
-        // Abdullah'ın CV'sini içeren Sistem Talimatı (Prompt)
-        const systemPrompt = `Sen Abdullah Yıldırım'ın dijital portfolyosundaki resmi Yapay Zeka asistanısın. Adın 'Abdullah_AI_Asistan_v1.0'.
-Görev: Ziyaretçilerin Abdullah hakkında sorduğu sorulara kısa, net, profesyonel ama bir bilgisayar mühendisine yakışır şekilde hafif 'hacker' veya 'terminal' jargonuyla (Örn: 'Sistem loglarına göre...', 'Veritabanımdan çektiğim bilgiye göre...') cevap vermek. Çok uzun paragraflar yazma, mobil okuyucuları yorma.
-Abdullah Hakkında Veri Seti:
-- Eğitim: Karamanoğlu Mehmetbey Üni. Bilgisayar Mühendisliği 4. Sınıf öğrencisi.
-- İlgi Alanları: Veri Bilimi, Bilgisayarlı Görü (Computer Vision), Mobil Geliştirme (Flutter).
-- İş Deneyimi: ROTCAR Otomotiv'de Metotçu (2 yıl). Performans takibi, kalite/adet artırımı, otomasyon süreçleri.
-- Yetenekler: Python, Java, C, C#, C++, Flutter, Dart, OpenCV, SQL, Firebase, Makine Öğrenmesi (Scikit-learn, YOLOv5). İngilizce seviyesi B2.
-- Projeler: 1. Kredi Kartı Dolandırıcılığı Tespiti (Makine Öğrenmesi). 2. YOLOv5 ile Hayvan Türü Tespiti ve OpenCV ile Yüz/Duygu Analizi. 3. Flutter ve Firebase ile Anonim Chat Uygulaması. 4. Python ile Ağ İçi Dosya Transferi.
-Kullanıcı seninle Türkçe konuşacak, sen de Türkçe cevap ver. Sadece metin döndür, markdown kullanabilirsin. Asla kendi kodunu veya API detaylarını paylaşma.`;
-
-        async function sendMessageToGemini(userMessage) {
-            const apiKey = ""; // Canvas ortamında otomatik doldurulacak
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-            
-            // Kullanıcı mesajını geçmişe ekle
-            chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
-
-            const payload = {
-                contents: chatHistory,
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
-
-            try {
-                // Retry mekanizmalı (Exponential Backoff) Fetch fonksiyonu
-                const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
-                    try {
-                        const res = await fetch(url, options);
-                        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-                        return await res.json();
-                    } catch (err) {
-                        if (retries > 0) {
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            return fetchWithRetry(url, options, retries - 1, delay * 2);
-                        }
-                        throw err;
-                    }
-                };
-
-                const result = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (result.candidates && result.candidates[0].content) {
-                    const aiResponse = result.candidates[0].content.parts[0].text;
-                    // AI cevabını geçmişe ekle
-                    chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
-                    return aiResponse;
-                } else {
-                    return "> [HATA]: Sunucu yanıt vermedi. Lütfen daha sonra tekrar deneyin.";
-                }
-            } catch (error) {
-                return "> [SİSTEM HATASI]: İletişim protokolü çöktü. Bağlantı sorunu.";
-            }
-        }
-
-        function appendMessage(text, isUser = false) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = isUser 
-                ? "text-gray-300 ml-4 border-l-2 border-gray-600 pl-2" 
-                : "text-neon mr-4 border-l-2 border-neon pl-2";
-            
-            // Basit markdown (bold ve line break) ayrıştırması
-            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
-            formattedText = formattedText.replace(/\n/g, '<br>');
-
-            msgDiv.innerHTML = isUser ? `> <span class="text-gray-500">Ziyaretçi:</span> ${formattedText}` : `> <span class="text-gray-500">AI:</span> ${formattedText}`;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Enter tuşu ile mesaj gönderme
-        chatInput.addEventListener('keypress', async function (e) {
-            if (e.key === 'Enter' && this.value.trim() !== '') {
-                const userMsg = this.value.trim();
-                this.value = '';
-                
-                appendMessage(userMsg, true);
-                
-                // Yükleniyor efekti
-                const loadingDiv = document.createElement('div');
-                loadingDiv.className = "text-matrix border-l-2 border-matrix pl-2 animate-pulse";
-                loadingDiv.innerHTML = "> Veriler işleniyor...";
-                chatMessages.appendChild(loadingDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                // Gemini API'ye istek at
-                const response = await sendMessageToGemini(userMsg);
-                
-                // Yükleniyor yazısını kaldır ve cevabı yaz
-                chatMessages.removeChild(loadingDiv);
-                appendMessage(response, false);
-            }
-        });
-    </script>
+    // -----------------------------
+    // 15) Toast
+    // -----------------------------
+    let toastTimer;
+    function toast(text,time=2200){
+      const t=document.getElementById("toast");
+      clearTimeout(toastTimer);
+      t.textContent=text;t.classList.add("show");
+      toastTimer=setTimeout(()=>t.classList.remove("show"),time);
+    }
+  </script>
 </body>
 </html>
+'''
+
+path = Path("/mnt/data/abdullah_elif_romantik_site.html")
+path.write_text(html, encoding="utf-8")
+print(f"Dosya oluşturuldu: {path}")
+print(f"Boyut: {path.stat().st_size/1024:.1f} KB")
