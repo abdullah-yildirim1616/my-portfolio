@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Abdullah & Elif — Kalp Oyunu</title>
+<style>
+  :root{
+    --pink-1:#ffb7d5;
+    --pink-2:#ff7fb6;
+    --pink-3:#e84f9b;
+    --cream:#fff8fc;
+    --ink:#4f2d46;
+    --glass:rgba(255,255,255,.20);
+    --glass-strong:rgba(255,255,255,.36);
+    --shadow:0 18px 55px rgba(111,31,78,.22);
+    --blue:#3a77d8;
+    --blue-dark:#27549d;
+    --orange:#f28b35;
+    --gray:#8e949d;
+    --gray-dark:#5f6670;
+  }
+
+  *{box-sizing:border-box}
+
+  html,body{
+    margin:0;
+    min-height:100%;
+    font-family:Inter, ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+    color:white;
+    overflow-x:hidden;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,.35), transparent 22%),
+      radial-gradient(circle at 78% 18%, rgba(255,230,245,.38), transparent 18%),
+      linear-gradient(155deg,#8d5bba 0%,#d66ca6 36%,#ff8cb5 67%,#ffb7c7 100%);
+  }
+
+  body{
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    padding:24px;
+  }
+
+  .page-glow,
+  .page-glow::before,
+  .page-glow::after{
+    position:fixed;
+    inset:auto;
+    content:"";
+    border-radius:50%;
+    filter:blur(55px);
+    pointer-events:none;
+    z-index:0;
+  }
+  .page-glow{width:260px;height:260px;left:-70px;top:18%;background:rgba(255,173,216,.36)}
+  .page-glow::before{width:330px;height:330px;left:75vw;top:40vh;background:rgba(172,120,255,.28)}
+  .page-glow::after{width:220px;height:220px;left:45vw;top:-90px;background:rgba(255,255,255,.20)}
+
+  .game{
+    width:min(1180px,100%);
+    min-height:min(780px,calc(100vh - 48px));
+    position:relative;
+    z-index:1;
+    border:1px solid rgba(255,255,255,.34);
+    border-radius:34px;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.07)),
+      radial-gradient(circle at 50% 12%,rgba(255,255,255,.16),transparent 34%);
+    box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.36);
+    backdrop-filter:blur(20px);
+    overflow:hidden;
+  }
+
+  .game::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,.85) 0 1px, transparent 1.6px),
+      radial-gradient(circle, rgba(255,228,244,.9) 0 1.2px, transparent 1.9px);
+    background-size:42px 42px, 67px 67px;
+    background-position:0 0, 20px 18px;
+    opacity:.22;
+    pointer-events:none;
+  }
+
+  header{
+    position:relative;
+    z-index:10;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    align-items:flex-start;
+    padding:26px 28px 10px;
+  }
+
+  .title-wrap{max-width:680px}
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    font-size:11px;
+    font-weight:800;
+    opacity:.78;
+    margin-bottom:7px;
+  }
+  h1{
+    margin:0;
+    font-size:clamp(28px,4.1vw,54px);
+    line-height:1;
+    letter-spacing:-.045em;
+    text-shadow:0 7px 24px rgba(94,25,67,.20);
+  }
+  .subtitle{
+    margin:10px 0 0;
+    font-size:14px;
+    color:rgba(255,255,255,.85);
+    max-width:590px;
+    line-height:1.55;
+  }
+
+  .score{
+    min-width:180px;
+    padding:13px 14px;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.30);
+    border-radius:18px;
+    box-shadow:0 10px 28px rgba(98,37,80,.12);
+  }
+  .score-top{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:750}
+  .meter{height:9px;background:rgba(255,255,255,.20);border-radius:999px;overflow:hidden;margin-top:9px}
+  .meter > span{
+    display:block;height:100%;width:92%;
+    border-radius:inherit;
+    background:linear-gradient(90deg,#ffe4f1,#fff,#ffd0e4);
+    box-shadow:0 0 18px rgba(255,255,255,.7);
+    animation:pulseMeter 2.2s ease-in-out infinite;
+  }
+  @keyframes pulseMeter{50%{filter:brightness(1.2);transform:scaleX(.985)}}
+
+  .stage{
+    position:relative;
+    margin:8px 20px 0;
+    height:510px;
+    border-radius:30px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.28);
+    background:
+      radial-gradient(ellipse at 50% 72%,rgba(255,255,255,.24),transparent 34%),
+      linear-gradient(180deg,rgba(121,70,170,.20) 0%,rgba(255,165,201,.14) 52%,rgba(255,230,240,.20) 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+  }
+
+  .moon{
+    position:absolute;
+    width:130px;height:130px;
+    right:8%;top:8%;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#fff 0 11%,#ffe5f2 35%,#ffc7df 72%,rgba(255,194,220,.78));
+    box-shadow:0 0 40px rgba(255,235,246,.75),0 0 100px rgba(255,193,222,.28);
+    opacity:.72;
+  }
+  .moon::after{
+    content:"";
+    position:absolute;
+    width:98px;height:98px;left:32px;top:-4px;border-radius:50%;
+    background:#aa6fc4;
+    opacity:.42;
+  }
+
+  .hill{
+    position:absolute;left:-6%;right:-6%;bottom:-100px;height:240px;border-radius:50%;
+    background:linear-gradient(180deg,rgba(255,220,237,.27),rgba(155,77,142,.18));
+    filter:blur(.1px);
+  }
+  .hill.two{bottom:-140px;left:34%;right:-25%;height:230px;opacity:.65}
+
+  .sparkles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .sparkle{
+    position:absolute;
+    width:5px;height:5px;border-radius:50%;
+    background:white;
+    box-shadow:0 0 10px 3px rgba(255,255,255,.65);
+    animation:twinkle var(--d,2.7s) ease-in-out infinite;
+    animation-delay:var(--delay,0s);
+    opacity:.8;
+  }
+  .sparkle::before,.sparkle::after{
+    content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    background:rgba(255,255,255,.82);border-radius:999px;
+  }
+  .sparkle::before{width:1px;height:14px}
+  .sparkle::after{width:14px;height:1px}
+  @keyframes twinkle{0%,100%{transform:scale(.45);opacity:.25}50%{transform:scale(1.15);opacity:1}}
+
+  .floating-hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .heart{
+    position:absolute;
+    bottom:-35px;
+    width:18px;height:18px;
+    transform:rotate(45deg);
+    background:rgba(255,236,247,.85);
+    border-radius:4px;
+    filter:drop-shadow(0 0 8px rgba(255,255,255,.42));
+    animation:floatHeart var(--dur,8s) linear infinite;
+    animation-delay:var(--delay,0s);
+    opacity:0;
+  }
+  .heart::before,.heart::after{
+    content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:inherit
+  }
+  .heart::before{left:-9px}
+  .heart::after{top:-9px}
+  @keyframes floatHeart{
+    0%{transform:translate(0,0) rotate(45deg) scale(.65);opacity:0}
+    12%{opacity:.82}
+    55%{transform:translate(var(--drift,30px),-290px) rotate(62deg) scale(1)}
+    100%{transform:translate(calc(var(--drift,30px)*-.6),-610px) rotate(86deg) scale(.62);opacity:0}
+  }
+
+  .scene-svg{
+    position:absolute;
+    width:min(720px,96%);
+    height:auto;
+    left:50%;
+    bottom:12px;
+    transform:translateX(-50%);
+    overflow:visible;
+    filter:drop-shadow(0 22px 19px rgba(92,40,76,.17));
+  }
+
+  .character{
+    transform-box:fill-box;
+    transform-origin:center bottom;
+    transition:transform .75s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .boy .arm-left,.boy .arm-right,.girl .arm-left,.girl .arm-right,
+  .boy .head,.girl .head{
+    transform-box:fill-box;
+    transform-origin:50% 10%;
+    transition:transform .65s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .boy .arm-left,.boy .arm-right,.girl .arm-left,.girl .arm-right{
+    transform-origin:50% 0%;
+  }
+
+  .name-tag{
+    font-weight:800;font-size:18px;fill:white;letter-spacing:.02em;
+    paint-order:stroke;stroke:rgba(86,38,76,.24);stroke-width:5px;stroke-linejoin:round
+  }
+
+  /* Idle motion */
+  .boy{animation:idleBoy 3.1s ease-in-out infinite}
+  .girl{animation:idleGirl 3.1s ease-in-out .16s infinite}
+  @keyframes idleBoy{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-5px)}}
+  @keyframes idleGirl{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-5px)}}
+
+  /* HUG */
+  .stage.action-hug .boy{animation:none;transform:translate(63px,-2px) rotate(2deg)}
+  .stage.action-hug .girl{animation:none;transform:translate(-63px,-2px) rotate(-2deg)}
+  .stage.action-hug .boy .arm-right{transform:rotate(-40deg) translate(-4px,-2px)}
+  .stage.action-hug .girl .arm-left{transform:rotate(40deg) translate(4px,-2px)}
+  .stage.action-hug .boy .head{transform:rotate(6deg)}
+  .stage.action-hug .girl .head{transform:rotate(-6deg)}
+
+  /* KISS */
+  .stage.action-kiss .boy{animation:none;transform:translate(82px,-3px) rotate(4deg)}
+  .stage.action-kiss .girl{animation:none;transform:translate(-82px,-3px) rotate(-4deg)}
+  .stage.action-kiss .boy .head{transform:rotate(10deg) translate(6px,0)}
+  .stage.action-kiss .girl .head{transform:rotate(-10deg) translate(-6px,0)}
+  .stage.action-kiss .boy .arm-right{transform:rotate(-28deg)}
+  .stage.action-kiss .girl .arm-left{transform:rotate(28deg)}
+
+  /* HOLD HANDS */
+  .stage.action-hands .boy{animation:none;transform:translate(24px,0)}
+  .stage.action-hands .girl{animation:none;transform:translate(-24px,0)}
+  .stage.action-hands .boy .arm-right{transform:rotate(-52deg)}
+  .stage.action-hands .girl .arm-left{transform:rotate(52deg)}
+
+  .kiss-pop{
+    position:absolute;
+    left:50%;top:41%;
+    transform:translate(-50%,-50%) scale(0);
+    font-size:52px;
+    filter:drop-shadow(0 8px 14px rgba(115,33,82,.2));
+    opacity:0;
+    pointer-events:none;
+  }
+  .action-kiss .kiss-pop{animation:kissPop 1.25s ease .35s both}
+  @keyframes kissPop{
+    0%{transform:translate(-50%,-50%) scale(0) rotate(-15deg);opacity:0}
+    45%{transform:translate(-50%,-50%) scale(1.2) rotate(8deg);opacity:1}
+    100%{transform:translate(-50%,-80%) scale(.85) rotate(0);opacity:0}
+  }
+
+  .hug-glow{
+    position:absolute;left:50%;top:55%;width:220px;height:220px;border-radius:50%;
+    transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
+    background:radial-gradient(circle,rgba(255,255,255,.40),rgba(255,206,229,.17) 45%,transparent 70%);
+  }
+  .action-hug .hug-glow{animation:hugGlow 1.7s ease-in-out infinite}
+  @keyframes hugGlow{0%,100%{opacity:.28;transform:translate(-50%,-50%) scale(.8)}50%{opacity:.7;transform:translate(-50%,-50%) scale(1.2)}}
+
+  .hand-heart{
+    position:absolute;left:50%;top:57%;font-size:28px;opacity:0;pointer-events:none;
+    transform:translate(-50%,-50%) scale(.4)
+  }
+  .action-hands .hand-heart{animation:handHeart 1.4s ease-in-out infinite}
+  @keyframes handHeart{0%,100%{opacity:.2;transform:translate(-50%,-50%) scale(.7)}50%{opacity:1;transform:translate(-50%,-70%) scale(1.05)}}
+
+  .cat{
+    position:absolute;
+    width:68px;height:68px;
+    bottom:58px;
+    filter:drop-shadow(0 8px 8px rgba(81,39,68,.18));
+    z-index:5;
+  }
+  .cat-left{left:10%;animation:catWalkLeft 8s ease-in-out infinite}
+  .cat-right{right:10%;animation:catWalkRight 9s ease-in-out .5s infinite}
+  .cat-mid{left:46%;bottom:32px;transform:scale(.72);animation:catBob 2.7s ease-in-out infinite}
+  @keyframes catWalkLeft{0%,100%{transform:translateX(0) rotate(-2deg)}50%{transform:translateX(115px) rotate(2deg)}}
+  @keyframes catWalkRight{0%,100%{transform:translateX(0) rotate(2deg)}50%{transform:translateX(-115px) rotate(-2deg)}}
+  @keyframes catBob{0%,100%{transform:scale(.72) translateY(0)}50%{transform:scale(.72) translateY(-8px)}}
+
+  .message-card{
+    position:absolute;
+    left:50%;
+    bottom:18px;
+    transform:translateX(-50%);
+    z-index:7;
+    min-width:min(520px,calc(100% - 32px));
+    max-width:680px;
+    text-align:center;
+    padding:11px 18px 12px;
+    border-radius:17px;
+    background:rgba(83,37,82,.24);
+    border:1px solid rgba(255,255,255,.20);
+    backdrop-filter:blur(13px);
+    box-shadow:0 10px 30px rgba(85,31,66,.12);
+  }
+  .message-title{font-weight:850;font-size:15px}
+  .message-text{font-size:12px;opacity:.85;margin-top:3px}
+
+  .controls{
+    position:relative;
+    z-index:10;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    padding:17px 18px 24px;
+  }
+  button{
+    appearance:none;border:1px solid rgba(255,255,255,.34);
+    background:rgba(255,255,255,.15);color:white;
+    border-radius:15px;padding:11px 16px;
+    font:inherit;font-size:13px;font-weight:800;
+    cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 7px 18px rgba(91,33,72,.11);
+    transition:.22s ease;
+  }
+  button:hover{transform:translateY(-2px);background:rgba(255,255,255,.24);box-shadow:0 10px 24px rgba(91,33,72,.15)}
+  button:active{transform:translateY(0) scale(.98)}
+  button.active{background:rgba(255,255,255,.34);border-color:rgba(255,255,255,.58)}
+  button.primary{
+    background:linear-gradient(135deg,rgba(255,255,255,.32),rgba(255,221,239,.19));
+    border-color:rgba(255,255,255,.52)
+  }
+
+  .burst-heart{
+    position:absolute;
+    z-index:20;
+    pointer-events:none;
+    animation:burst 1.6s cubic-bezier(.15,.8,.25,1) forwards;
+    font-size:var(--size,22px);
+    left:50%;top:50%;
+    filter:drop-shadow(0 6px 9px rgba(85,25,60,.16));
+  }
+  @keyframes burst{
+    0%{transform:translate(-50%,-50%) scale(.2) rotate(0);opacity:0}
+    18%{opacity:1}
+    100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.15) rotate(var(--r));opacity:0}
+  }
+
+  .tip{
+    text-align:center;
+    font-size:11px;
+    opacity:.66;
+    padding:0 20px 20px;
+    position:relative;z-index:5;
+  }
+
+  @media (max-width:760px){
+    body{padding:0}
+    .game{min-height:100vh;border-radius:0;border-left:0;border-right:0}
+    header{padding:20px 18px 8px;display:block}
+    .score{margin-top:14px;width:100%;min-width:0}
+    .stage{margin:8px 10px 0;height:500px}
+    .scene-svg{width:790px;max-width:none;left:50%;bottom:28px}
+    .cat{width:54px;height:54px;bottom:74px}
+    .cat-left{left:2%}.cat-right{right:2%}.cat-mid{bottom:55px}
+    .message-card{bottom:12px}
+    .controls{padding-bottom:16px}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+<div class="page-glow"></div>
+
+<main class="game" aria-label="Abdullah ve Elif sevgi oyunu">
+  <header>
+    <div class="title-wrap">
+      <div class="eyebrow">Mini co-op love quest</div>
+      <h1>Abdullah <span style="opacity:.68">♥</span> Elif</h1>
+      <p class="subtitle">Bazen küçük bir tartışma olur; ama doğru takım arkadaşını bulduysan oyun devam eder. Bu bölümün görevi: gülümsetmek, sarılmak ve barışı %100’e tamamlamak.</p>
+    </div>
+    <div class="score" aria-label="Barış puanı">
+      <div class="score-top"><span>Barış Puanı</span><span id="scoreText">92%</span></div>
+      <div class="meter"><span id="meterFill"></span></div>
+    </div>
+  </header>
+
+  <section class="stage action-hug" id="stage">
+    <div class="moon"></div>
+    <div class="hill"></div>
+    <div class="hill two"></div>
+
+    <div class="sparkles" id="sparkles"></div>
+    <div class="floating-hearts" id="floatingHearts"></div>
+    <div class="hug-glow"></div>
+    <div class="kiss-pop">💗</div>
+    <div class="hand-heart">💞</div>
+
+    <!-- Kedi 1 -->
+    <svg class="cat cat-left" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M28 37 20 18 40 30M72 37l8-19-20 12" fill="#f7d0a4" stroke="#6a4961" stroke-width="4" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="53" rx="31" ry="26" fill="#f7d0a4" stroke="#6a4961" stroke-width="4"/>
+      <circle cx="39" cy="49" r="4" fill="#4b3951"/><circle cx="61" cy="49" r="4" fill="#4b3951"/>
+      <path d="M47 58h6l-3 4z" fill="#e98594"/><path d="M50 62c-4 5-8 5-11 1m11-1c4 5 8 5 11 1" fill="none" stroke="#6a4961" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M23 59 7 55m17 10L8 68m69-9 16-4m-17 10 16 4" stroke="#6a4961" stroke-width="2" stroke-linecap="round"/>
+      <path d="M76 71c16 7 17 20 7 22-8 2-12-6-6-10" fill="none" stroke="#6a4961" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+
+    <!-- Kedi 2 -->
+    <svg class="cat cat-right" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M28 37 20 18 40 30M72 37l8-19-20 12" fill="#c6cbd7" stroke="#5c5267" stroke-width="4" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="53" rx="31" ry="26" fill="#c6cbd7" stroke="#5c5267" stroke-width="4"/>
+      <circle cx="39" cy="49" r="4" fill="#413b49"/><circle cx="61" cy="49" r="4" fill="#413b49"/>
+      <path d="M47 58h6l-3 4z" fill="#e98594"/><path d="M50 62c-4 5-8 5-11 1m11-1c4 5 8 5 11 1" fill="none" stroke="#5c5267" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M23 59 7 55m17 10L8 68m69-9 16-4m-17 10 16 4" stroke="#5c5267" stroke-width="2" stroke-linecap="round"/>
+      <path d="M76 71c16 7 17 20 7 22-8 2-12-6-6-10" fill="none" stroke="#5c5267" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+
+    <!-- Kedi 3 -->
+    <svg class="cat cat-mid" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M28 37 20 18 40 30M72 37l8-19-20 12" fill="#fff3e6" stroke="#80526d" stroke-width="4" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="53" rx="31" ry="26" fill="#fff3e6" stroke="#80526d" stroke-width="4"/>
+      <circle cx="39" cy="49" r="4" fill="#563b50"/><circle cx="61" cy="49" r="4" fill="#563b50"/>
+      <path d="M47 58h6l-3 4z" fill="#e98594"/><path d="M50 62c-4 5-8 5-11 1m11-1c4 5 8 5 11 1" fill="none" stroke="#80526d" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+
+    <!-- Ana karakterler -->
+    <svg class="scene-svg" viewBox="0 0 760 460" role="img" aria-label="Abdullah ve Elif karakterleri">
+      <defs>
+        <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffd2b7"/>
+          <stop offset="100%" stop-color="#efaa8d"/>
+        </linearGradient>
+        <linearGradient id="pants" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4c86e0"/>
+          <stop offset="100%" stop-color="#2c5ca7"/>
+        </linearGradient>
+        <linearGradient id="shirtOrange" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ff9d46"/>
+          <stop offset="100%" stop-color="#e97822"/>
+        </linearGradient>
+        <linearGradient id="shirtGray" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a6abb2"/>
+          <stop offset="100%" stop-color="#737a84"/>
+        </linearGradient>
+      </defs>
+
+      <!-- zemin -->
+      <ellipse cx="380" cy="425" rx="250" ry="28" fill="rgba(99,42,91,.14)"/>
+
+      <!-- ABDULLAH -->
+      <g class="character boy">
+        <text class="name-tag" x="252" y="55" text-anchor="middle">Abdullah</text>
+
+        <!-- bacaklar -->
+        <path d="M207 300 Q215 286 242 286 L259 286 L253 390 Q252 410 234 410 L218 410 Q207 408 210 392Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
+        <path d="M259 286 Q287 286 296 301 L296 392 Q299 408 285 410 L267 410 Q253 408 254 390Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
+        <path d="M206 402 Q227 397 250 403 L248 418 Q226 426 201 417Z" fill="#edf0f4" stroke="#68566b" stroke-width="4"/>
+        <path d="M258 403 Q278 397 300 402 L304 416 Q282 426 257 418Z" fill="#edf0f4" stroke="#68566b" stroke-width="4"/>
+
+        <!-- torso gri polo -->
+        <path d="M202 175 Q226 159 250 161 Q281 160 305 178 L298 291 Q283 302 252 302 Q218 301 202 290Z" fill="url(#shirtGray)" stroke="#5c626a" stroke-width="4"/>
+        <!-- polo yaka -->
+        <path d="M233 164 251 181 268 163 278 171 260 195 250 185 240 196 224 171Z" fill="#8b919a" stroke="#5c626a" stroke-width="3"/>
+        <path d="M251 181v31" stroke="#606771" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="251" cy="196" r="2.5" fill="#545a64"/><circle cx="251" cy="205" r="2.5" fill="#545a64"/>
+
+        <!-- kollar -->
+        <g class="arm-left">
+          <path d="M207 182 Q192 182 183 207 L170 260 Q167 275 181 279 Q194 282 200 264 L216 215 Q220 194 207 182Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+          <path d="M210 180 Q193 178 186 198 L182 214 207 222 219 194Z" fill="url(#shirtGray)" stroke="#5c626a" stroke-width="4"/>
+          <circle cx="176" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+        </g>
+
+        <g class="arm-right">
+          <path d="M297 183 Q311 183 319 207 L333 260 Q337 275 323 279 Q309 282 304 264 L288 215 Q283 194 297 183Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+          <path d="M296 180 Q313 178 320 198 L325 214 300 222 286 194Z" fill="url(#shirtGray)" stroke="#5c626a" stroke-width="4"/>
+          <circle cx="327" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+        </g>
+
+        <!-- boyun -->
+        <path d="M237 158v21q14 14 29 0v-22" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+
+        <!-- kafa -->
+        <g class="head">
+          <ellipse cx="251" cy="121" rx="49" ry="52" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+          <!-- saç -->
+          <path d="M205 117q-6-57 48-59 50 1 45 56-11-21-28-27-25 11-60 7z" fill="#4b352e" stroke="#3d2b27" stroke-width="4"/>
+          <path d="M212 90q13-25 42-25 23 0 37 20-22-12-41-7-18 5-38 12z" fill="#5b4037"/>
+          <!-- kulak -->
+          <ellipse cx="204" cy="126" rx="9" ry="14" fill="url(#skin)" stroke="#9e695c" stroke-width="3"/>
+          <ellipse cx="298" cy="126" rx="9" ry="14" fill="url(#skin)" stroke="#9e695c" stroke-width="3"/>
+          <!-- yüz -->
+          <path d="M224 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M262 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="233" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
+          <ellipse cx="270" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
+          <path d="M247 128q-3 10 5 10" fill="none" stroke="#b77a6d" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M238 146q13 10 27 0" fill="none" stroke="#9e5368" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="219" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".35"/>
+          <ellipse cx="283" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".35"/>
+        </g>
+      </g>
+
+      <!-- ELIF -->
+      <g class="character girl">
+        <text class="name-tag" x="508" y="55" text-anchor="middle">Elif</text>
+
+        <!-- bacaklar -->
+        <path d="M463 300 Q470 286 497 286 L514 286 L509 390 Q508 410 490 410 L474 410 Q463 408 466 392Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
+        <path d="M514 286 Q542 286 551 301 L551 392 Q554 408 540 410 L522 410 Q508 408 509 390Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
+        <path d="M461 402 Q482 397 505 403 L503 418 Q481 426 456 417Z" fill="#f9edf4" stroke="#75556a" stroke-width="4"/>
+        <path d="M513 403 Q533 397 555 402 L559 416 Q537 426 512 418Z" fill="#f9edf4" stroke="#75556a" stroke-width="4"/>
+
+        <!-- turuncu gömlek -->
+        <path d="M458 176 Q480 160 508 161 Q539 160 561 177 L554 291 Q537 303 507 303 Q477 303 457 290Z" fill="url(#shirtOrange)" stroke="#c2611c" stroke-width="4"/>
+        <path d="M482 164q25 20 51 0" fill="none" stroke="#f8ae68" stroke-width="7" stroke-linecap="round"/>
+        <path d="M481 218q27 9 54 0" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="4"/>
+
+        <!-- kollar -->
+        <g class="arm-left">
+          <path d="M463 183 Q448 183 440 207 L425 261 Q421 275 435 279 Q448 282 454 265 L470 215 Q475 194 463 183Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+          <path d="M462 181 Q445 179 439 198 L434 215 459 223 473 194Z" fill="url(#shirtOrange)" stroke="#c2611c" stroke-width="4"/>
+          <circle cx="430" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+        </g>
+
+        <g class="arm-right">
+          <path d="M554 183 Q569 183 577 207 L591 261 Q595 275 581 279 Q568 282 562 265 L546 215 Q541 194 554 183Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+          <path d="M555 181 Q572 179 578 198 L583 215 558 223 544 194Z" fill="url(#shirtOrange)" stroke="#c2611c" stroke-width="4"/>
+          <circle cx="586" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+        </g>
+
+        <!-- boyun -->
+        <path d="M493 158v21q14 14 29 0v-22" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+
+        <!-- kafa -->
+        <g class="head">
+          <!-- saç arkası -->
+          <path d="M458 112q-5-55 49-57 53 1 52 60l-7 64q-18 24-39 8-28 17-50-9z" fill="#4a302f" stroke="#3a2528" stroke-width="4"/>
+          <ellipse cx="508" cy="121" rx="48" ry="52" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+          <!-- saç üst -->
+          <path d="M462 110q-3-47 47-52 39 4 46 42-26-18-55-15-16 16-38 25z" fill="#573536"/>
+          <path d="M502 64q-20 22-39 30" fill="none" stroke="#6b4143" stroke-width="5" stroke-linecap="round"/>
+          <!-- yüz -->
+          <path d="M480 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M518 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="489" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
+          <ellipse cx="526" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
+          <path d="M503 128q-3 10 5 10" fill="none" stroke="#b77a6d" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M494 146q13 10 27 0" fill="none" stroke="#a64f68" stroke-width="3.5" stroke-linecap="round"/>
+          <ellipse cx="475" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".38"/>
+          <ellipse cx="539" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".38"/>
+        </g>
+      </g>
+    </svg>
+
+    <div class="message-card">
+      <div class="message-title" id="messageTitle">Sarılma modu aktif 🤍</div>
+      <div class="message-text" id="messageText">Görev: küçük tartışmayı büyük bir sarılmayla kapat.</div>
+    </div>
+  </section>
+
+  <div class="controls" role="group" aria-label="Animasyon kontrolleri">
+    <button data-action="hug" class="active">🤍 Sarıl</button>
+    <button data-action="kiss">💗 Öpücük</button>
+    <button data-action="hands">🤝 El Ele</button>
+    <button data-action="idle">✨ Yan Yana</button>
+    <button class="primary" id="surpriseBtn">💞 Barış Sürprizi</button>
+  </div>
+  <div class="tip">İpucu: Animasyonlar kendiliğinden sırayla değişir; istersen butonlarla istediğin anı seçebilirsin.</div>
+</main>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const buttons = [...document.querySelectorAll('button[data-action]')];
+  const title = document.getElementById('messageTitle');
+  const text = document.getElementById('messageText');
+  const scoreText = document.getElementById('scoreText');
+  const meter = document.getElementById('meterFill');
+  const surpriseBtn = document.getElementById('surpriseBtn');
+
+  const actions = {
+    hug: {
+      className: 'action-hug',
+      title: 'Sarılma modu aktif 🤍',
+      text: 'Görev: küçük tartışmayı büyük bir sarılmayla kapat.',
+      score: 96
+    },
+    kiss: {
+      className: 'action-kiss',
+      title: 'Öpücük kombosu! 💗',
+      text: 'Bonus puan: sevgi + sabır + minik bir gülümseme.',
+      score: 99
+    },
+    hands: {
+      className: 'action-hands',
+      title: 'El ele, aynı takım 🤝',
+      text: 'Co-op modu: problem karşıda, siz aynı taraftasınız.',
+      score: 100
+    },
+    idle: {
+      className: 'action-idle',
+      title: 'Yan yana modu ✨',
+      text: 'Bazen hiçbir şey söylemeden yanında durmak da yeter.',
+      score: 94
+    }
+  };
+
+  let current = 'hug';
+  let autoIndex = 0;
+  let autoTimer;
+
+  function setAction(action, userTriggered = false){
+    const data = actions[action];
+    current = action;
+    stage.classList.remove('action-hug','action-kiss','action-hands','action-idle');
+    stage.classList.add(data.className);
+
+    buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.action === action));
+    title.textContent = data.title;
+    text.textContent = data.text;
+    scoreText.textContent = data.score + '%';
+    meter.style.width = data.score + '%';
+
+    if(action !== 'idle') heartBurst(action === 'kiss' ? 13 : 8);
+    if(userTriggered) restartAuto();
+  }
+
+  function restartAuto(){
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => {
+      const seq = ['hug','hands','kiss','idle'];
+      autoIndex = (autoIndex + 1) % seq.length;
+      setAction(seq[autoIndex], false);
+    }, 5600);
+  }
+
+  buttons.forEach(btn => btn.addEventListener('click', () => setAction(btn.dataset.action, true)));
+
+  function heartBurst(count = 12){
+    const glyphs = ['♥','♡','💗','✦','💕'];
+    for(let i=0;i<count;i++){
+      const el = document.createElement('span');
+      el.className = 'burst-heart';
+      el.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+      const angle = (Math.PI*2/count)*i + Math.random()*.35;
+      const dist = 90 + Math.random()*170;
+      el.style.setProperty('--x', Math.cos(angle)*dist + 'px');
+      el.style.setProperty('--y', Math.sin(angle)*dist + 'px');
+      el.style.setProperty('--r', (Math.random()*100-50)+'deg');
+      el.style.setProperty('--size', (14+Math.random()*23)+'px');
+      el.style.color = Math.random() > .45 ? '#fff2f8' : '#ffd0e4';
+      stage.appendChild(el);
+      setTimeout(() => el.remove(), 1700);
+    }
+  }
+
+  surpriseBtn.addEventListener('click', () => {
+    const seq = ['hug','kiss','hands','kiss'];
+    let i = 0;
+    clearInterval(autoTimer);
+    surpriseBtn.disabled = true;
+    surpriseBtn.textContent = '💖 Barış tamamlanıyor...';
+    const play = () => {
+      setAction(seq[i], false);
+      heartBurst(18);
+      i++;
+      if(i < seq.length){
+        setTimeout(play, 1250);
+      } else {
+        setTimeout(() => {
+          scoreText.textContent = '100%';
+          meter.style.width = '100%';
+          title.textContent = 'Görev tamamlandı: Abdullah + Elif 💞';
+          text.textContent = 'Küçük tartışmalar geçer; güzel olan yine birbirinizi seçmeniz.';
+          surpriseBtn.disabled = false;
+          surpriseBtn.textContent = '💞 Barış Sürprizi';
+          restartAuto();
+        }, 1400);
+      }
+    };
+    play();
+  });
+
+  // Parıltılar
+  const sparkles = document.getElementById('sparkles');
+  for(let i=0;i<34;i++){
+    const s = document.createElement('span');
+    s.className = 'sparkle';
+    s.style.left = (2 + Math.random()*96) + '%';
+    s.style.top = (4 + Math.random()*82) + '%';
+    s.style.setProperty('--d', (1.7 + Math.random()*3.2) + 's');
+    s.style.setProperty('--delay', (-Math.random()*4) + 's');
+    const scale = .55 + Math.random()*.85;
+    s.style.transform = `scale(${scale})`;
+    sparkles.appendChild(s);
+  }
+
+  // Sürekli dolaşan kalpler
+  const hearts = document.getElementById('floatingHearts');
+  for(let i=0;i<18;i++){
+    const h = document.createElement('span');
+    h.className = 'heart';
+    h.style.left = (2 + Math.random()*96) + '%';
+    h.style.setProperty('--dur', (6 + Math.random()*6) + 's');
+    h.style.setProperty('--delay', (-Math.random()*10) + 's');
+    h.style.setProperty('--drift', (-55 + Math.random()*110) + 'px');
+    const size = 9 + Math.random()*12;
+    h.style.width = h.style.height = size + 'px';
+    hearts.appendChild(h);
+  }
+
+  restartAuto();
+})();
+</script>
+</body>
+</html>
