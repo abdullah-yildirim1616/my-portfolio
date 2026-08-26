@@ -1,759 +1,1006 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Abdullah & Elif — Kalp Oyunu</title>
-<style>
-  :root{
-    --pink-1:#ffb7d5;
-    --pink-2:#ff7fb6;
-    --pink-3:#e84f9b;
-    --cream:#fff8fc;
-    --ink:#4f2d46;
-    --glass:rgba(255,255,255,.20);
-    --glass-strong:rgba(255,255,255,.36);
-    --shadow:0 18px 55px rgba(111,31,78,.22);
-    --blue:#3a77d8;
-    --blue-dark:#27549d;
-    --orange:#f28b35;
-    --gray:#8e949d;
-    --gray-dark:#5f6670;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#160912" />
+  <title>Abdullah ♥ Elif — Bizim Hikâyemiz</title>
+  <style>
+    :root{
+      --bg:#120812;
+      --bg2:#230d1d;
+      --card:rgba(255,255,255,.08);
+      --card-strong:rgba(255,255,255,.12);
+      --text:#fff8fb;
+      --muted:#d9b8c8;
+      --pink:#ff4f91;
+      --pink2:#ff82b4;
+      --rose:#ff174f;
+      --gold:#ffd27a;
+      --violet:#b780ff;
+      --shadow:0 25px 80px rgba(0,0,0,.35);
+      --radius:28px;
+    }
 
-  *{box-sizing:border-box}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 12%, rgba(255,79,145,.17), transparent 26%),
+        radial-gradient(circle at 85% 18%, rgba(183,128,255,.12), transparent 28%),
+        radial-gradient(circle at 50% 86%, rgba(255,23,79,.12), transparent 30%),
+        linear-gradient(180deg,var(--bg),#0a050b 62%,#160812);
+      overflow-x:hidden;
+    }
 
-  html,body{
-    margin:0;
-    min-height:100%;
-    font-family:Inter, ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
-    color:white;
-    overflow-x:hidden;
-    background:
-      radial-gradient(circle at 20% 10%, rgba(255,255,255,.35), transparent 22%),
-      radial-gradient(circle at 78% 18%, rgba(255,230,245,.38), transparent 18%),
-      linear-gradient(155deg,#8d5bba 0%,#d66ca6 36%,#ff8cb5 67%,#ffb7c7 100%);
-  }
+    body::before{
+      content:"";
+      position:fixed; inset:0; pointer-events:none; z-index:-3;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.9) 0 1px, transparent 1.2px),
+        radial-gradient(circle, rgba(255,130,180,.7) 0 1px, transparent 1.2px);
+      background-size:52px 52px, 91px 91px;
+      background-position:0 0, 20px 17px;
+      opacity:.18;
+      animation:starDrift 28s linear infinite;
+    }
+    @keyframes starDrift{to{background-position:52px 104px,111px 199px}}
 
-  body{
-    min-height:100vh;
-    display:grid;
-    place-items:center;
-    padding:24px;
-  }
+    ::selection{background:var(--pink);color:white}
+    button,input{font:inherit}
+    button{cursor:pointer}
 
-  .page-glow,
-  .page-glow::before,
-  .page-glow::after{
-    position:fixed;
-    inset:auto;
-    content:"";
-    border-radius:50%;
-    filter:blur(55px);
-    pointer-events:none;
-    z-index:0;
-  }
-  .page-glow{width:260px;height:260px;left:-70px;top:18%;background:rgba(255,173,216,.36)}
-  .page-glow::before{width:330px;height:330px;left:75vw;top:40vh;background:rgba(172,120,255,.28)}
-  .page-glow::after{width:220px;height:220px;left:45vw;top:-90px;background:rgba(255,255,255,.20)}
+    .noise{
+      position:fixed; inset:0; pointer-events:none; z-index:99; opacity:.035;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+    }
 
-  .game{
-    width:min(1180px,100%);
-    min-height:min(780px,calc(100vh - 48px));
-    position:relative;
-    z-index:1;
-    border:1px solid rgba(255,255,255,.34);
-    border-radius:34px;
-    background:
-      linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.07)),
-      radial-gradient(circle at 50% 12%,rgba(255,255,255,.16),transparent 34%);
-    box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.36);
-    backdrop-filter:blur(20px);
-    overflow:hidden;
-  }
+    .floating-heart{
+      position:fixed; bottom:-60px; left:var(--x);
+      font-size:var(--s); opacity:0; pointer-events:none; z-index:-1;
+      filter:drop-shadow(0 5px 15px rgba(255,80,145,.25));
+      animation:floatUp var(--d) linear infinite;
+      animation-delay:var(--delay);
+    }
+    @keyframes floatUp{
+      0%{transform:translate3d(0,0,0) rotate(0deg) scale(.7);opacity:0}
+      10%{opacity:.65}
+      85%{opacity:.3}
+      100%{transform:translate3d(var(--drift),-115vh,0) rotate(280deg) scale(1.15);opacity:0}
+    }
 
-  .game::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background-image:
-      radial-gradient(circle, rgba(255,255,255,.85) 0 1px, transparent 1.6px),
-      radial-gradient(circle, rgba(255,228,244,.9) 0 1.2px, transparent 1.9px);
-    background-size:42px 42px, 67px 67px;
-    background-position:0 0, 20px 18px;
-    opacity:.22;
-    pointer-events:none;
-  }
+    .topbar{
+      position:fixed; top:18px; left:50%; transform:translateX(-50%);
+      z-index:80; width:min(920px,calc(100% - 28px));
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:10px 12px 10px 18px;
+      background:rgba(18,8,18,.66);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(18px);
+      border-radius:999px;
+      box-shadow:0 15px 50px rgba(0,0,0,.25);
+    }
+    .brand{font-weight:800;letter-spacing:.2px;white-space:nowrap}
+    .brand span{color:var(--pink2)}
+    .nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+    .nav a{
+      color:var(--muted); text-decoration:none; padding:9px 12px; border-radius:999px;
+      font-size:13px; transition:.2s ease;
+    }
+    .nav a:hover{background:rgba(255,255,255,.08);color:white}
+    .icon-btn{
+      border:none; width:42px;height:42px;border-radius:50%; color:white;
+      background:linear-gradient(135deg,rgba(255,79,145,.85),rgba(183,128,255,.85));
+      box-shadow:0 8px 30px rgba(255,79,145,.28); flex:none;
+      transition:transform .2s ease;
+    }
+    .icon-btn:hover{transform:scale(1.08) rotate(-4deg)}
 
-  header{
-    position:relative;
-    z-index:10;
-    display:flex;
-    justify-content:space-between;
-    gap:20px;
-    align-items:flex-start;
-    padding:26px 28px 10px;
-  }
+    .hero{
+      min-height:100svh; display:grid; place-items:center; text-align:center;
+      padding:140px 22px 80px; position:relative;
+    }
+    .hero-inner{width:min(1000px,100%);position:relative}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:9px;
+      padding:9px 14px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.055);border-radius:999px;color:#f7c9da;
+      font-size:14px;backdrop-filter:blur(12px);
+      animation:fadeUp .8s both;
+    }
+    .eyebrow .dot{
+      width:8px;height:8px;border-radius:50%;background:var(--pink);
+      box-shadow:0 0 18px var(--pink);animation:pulse 1.5s infinite;
+    }
+    @keyframes pulse{50%{transform:scale(1.55);opacity:.55}}
+    h1{
+      margin:24px auto 16px; max-width:950px;
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:clamp(50px,10vw,126px); line-height:.85; letter-spacing:-5px;
+      font-weight:500;
+      animation:fadeUp .9s .08s both;
+    }
+    h1 .amp{
+      display:inline-block; color:var(--pink); font-style:italic;
+      transform:translateY(-3px); text-shadow:0 0 50px rgba(255,79,145,.45);
+    }
+    .hero-sub{
+      max-width:700px;margin:0 auto;color:var(--muted);
+      font-size:clamp(17px,2.2vw,22px);line-height:1.7;
+      animation:fadeUp .9s .15s both;
+    }
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:34px;animation:fadeUp .9s .22s both}
+    .btn{
+      border:1px solid rgba(255,255,255,.13);
+      color:white;padding:14px 20px;border-radius:999px;
+      background:rgba(255,255,255,.07);backdrop-filter:blur(10px);
+      transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover{transform:translateY(-3px);background:rgba(255,255,255,.12)}
+    .btn.primary{
+      border:none;background:linear-gradient(135deg,var(--rose),var(--pink2));
+      box-shadow:0 12px 35px rgba(255,23,79,.27);
+    }
+    .btn.primary:hover{box-shadow:0 18px 45px rgba(255,23,79,.38)}
+    .hero-orbit{
+      width:min(600px,88vw);aspect-ratio:1;position:absolute;left:50%;top:50%;
+      transform:translate(-50%,-48%);z-index:-1;border:1px solid rgba(255,255,255,.05);
+      border-radius:50%;animation:spin 24s linear infinite;
+    }
+    .hero-orbit::before,.hero-orbit::after{
+      content:"♥";position:absolute;color:rgba(255,130,180,.65);
+      filter:drop-shadow(0 0 16px rgba(255,79,145,.5));font-size:24px;
+    }
+    .hero-orbit::before{left:13%;top:9%}
+    .hero-orbit::after{right:4%;bottom:24%;font-size:15px}
+    @keyframes spin{to{transform:translate(-50%,-48%) rotate(360deg)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
-  .title-wrap{max-width:680px}
-  .eyebrow{
-    text-transform:uppercase;
-    letter-spacing:.18em;
-    font-size:11px;
-    font-weight:800;
-    opacity:.78;
-    margin-bottom:7px;
-  }
-  h1{
-    margin:0;
-    font-size:clamp(28px,4.1vw,54px);
-    line-height:1;
-    letter-spacing:-.045em;
-    text-shadow:0 7px 24px rgba(94,25,67,.20);
-  }
-  .subtitle{
-    margin:10px 0 0;
-    font-size:14px;
-    color:rgba(255,255,255,.85);
-    max-width:590px;
-    line-height:1.55;
-  }
+    .scrollhint{
+      position:absolute;left:50%;bottom:28px;transform:translateX(-50%);
+      color:#c89caf;font-size:12px;letter-spacing:2px;text-transform:uppercase;
+    }
+    .scrollhint::after{
+      content:"";display:block;width:1px;height:36px;margin:10px auto 0;
+      background:linear-gradient(var(--pink),transparent);animation:scrollLine 1.4s ease-in-out infinite;
+    }
+    @keyframes scrollLine{50%{height:52px;opacity:.45}}
 
-  .score{
-    min-width:180px;
-    padding:13px 14px;
-    background:rgba(255,255,255,.18);
-    border:1px solid rgba(255,255,255,.30);
-    border-radius:18px;
-    box-shadow:0 10px 28px rgba(98,37,80,.12);
-  }
-  .score-top{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:750}
-  .meter{height:9px;background:rgba(255,255,255,.20);border-radius:999px;overflow:hidden;margin-top:9px}
-  .meter > span{
-    display:block;height:100%;width:92%;
-    border-radius:inherit;
-    background:linear-gradient(90deg,#ffe4f1,#fff,#ffd0e4);
-    box-shadow:0 0 18px rgba(255,255,255,.7);
-    animation:pulseMeter 2.2s ease-in-out infinite;
-  }
-  @keyframes pulseMeter{50%{filter:brightness(1.2);transform:scaleX(.985)}}
+    main{position:relative}
+    section{padding:90px 20px}
+    .wrap{width:min(1120px,100%);margin:auto}
+    .section-head{margin-bottom:30px}
+    .kicker{color:var(--pink2);text-transform:uppercase;letter-spacing:2.8px;font-size:12px;font-weight:800}
+    h2{
+      font-family:Georgia,"Times New Roman",serif;
+      font-size:clamp(38px,6vw,72px);font-weight:500;letter-spacing:-2px;
+      margin:9px 0 12px;
+    }
+    .section-head p{color:var(--muted);max-width:700px;line-height:1.75;margin:0}
 
-  .stage{
-    position:relative;
-    margin:8px 20px 0;
-    height:510px;
-    border-radius:30px;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.28);
-    background:
-      radial-gradient(ellipse at 50% 72%,rgba(255,255,255,.24),transparent 34%),
-      linear-gradient(180deg,rgba(121,70,170,.20) 0%,rgba(255,165,201,.14) 52%,rgba(255,230,240,.20) 100%);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
-  }
+    .glass{
+      background:linear-gradient(135deg,rgba(255,255,255,.095),rgba(255,255,255,.035));
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter:blur(16px);
+      border-radius:var(--radius);box-shadow:var(--shadow);
+    }
 
-  .moon{
-    position:absolute;
-    width:130px;height:130px;
-    right:8%;top:8%;
-    border-radius:50%;
-    background:radial-gradient(circle at 35% 35%,#fff 0 11%,#ffe5f2 35%,#ffc7df 72%,rgba(255,194,220,.78));
-    box-shadow:0 0 40px rgba(255,235,246,.75),0 0 100px rgba(255,193,222,.28);
-    opacity:.72;
-  }
-  .moon::after{
-    content:"";
-    position:absolute;
-    width:98px;height:98px;left:32px;top:-4px;border-radius:50%;
-    background:#aa6fc4;
-    opacity:.42;
-  }
+    .letter-layout{display:grid;grid-template-columns:1fr .8fr;gap:20px;align-items:stretch}
+    .letter{padding:34px;position:relative;overflow:hidden;min-height:440px}
+    .letter::after{
+      content:"“";position:absolute;right:22px;top:-28px;font-family:Georgia,serif;
+      font-size:220px;color:rgba(255,255,255,.04);
+    }
+    .letter p{color:#f7dfe9;font-size:17px;line-height:1.9;max-width:720px}
+    .signature{font-family:cursive;font-size:34px;color:var(--pink2);margin-top:26px}
+    .mini-card{padding:30px;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative;overflow:hidden}
+    .mini-card .big-heart{
+      font-size:92px;line-height:1;filter:drop-shadow(0 0 30px rgba(255,79,145,.42));
+      animation:heartbeat 1.25s infinite;
+    }
+    @keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.13)}28%{transform:scale(1)}42%{transform:scale(1.1)}70%{transform:scale(1)}}
+    .mini-card strong{font-size:24px;margin-top:14px}
+    .mini-card small{color:var(--muted);margin-top:8px;line-height:1.55}
 
-  .hill{
-    position:absolute;left:-6%;right:-6%;bottom:-100px;height:240px;border-radius:50%;
-    background:linear-gradient(180deg,rgba(255,220,237,.27),rgba(155,77,142,.18));
-    filter:blur(.1px);
-  }
-  .hill.two{bottom:-140px;left:34%;right:-25%;height:230px;opacity:.65}
+    .counter-card{padding:30px}
+    .date-row{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:18px}
+    .date-row p{margin:0;color:var(--muted)}
+    .date-input{
+      color:white;background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;
+      color-scheme:dark;
+    }
+    .counters{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .count-box{padding:24px 12px;text-align:center;background:rgba(255,255,255,.055);border-radius:20px;border:1px solid rgba(255,255,255,.07)}
+    .count-box b{display:block;font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff}
+    .count-box span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1.3px}
 
-  .sparkles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  .sparkle{
-    position:absolute;
-    width:5px;height:5px;border-radius:50%;
-    background:white;
-    box-shadow:0 0 10px 3px rgba(255,255,255,.65);
-    animation:twinkle var(--d,2.7s) ease-in-out infinite;
-    animation-delay:var(--delay,0s);
-    opacity:.8;
-  }
-  .sparkle::before,.sparkle::after{
-    content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    background:rgba(255,255,255,.82);border-radius:999px;
-  }
-  .sparkle::before{width:1px;height:14px}
-  .sparkle::after{width:14px;height:1px}
-  @keyframes twinkle{0%,100%{transform:scale(.45);opacity:.25}50%{transform:scale(1.15);opacity:1}}
+    .reasons-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .reason{
+      min-height:220px;padding:24px;position:relative;overflow:hidden;
+      transition:.3s ease;transform-style:preserve-3d;
+    }
+    .reason:hover{transform:translateY(-8px) rotateX(2deg);border-color:rgba(255,130,180,.35)}
+    .reason .num{font-size:12px;color:#ffb4cf;letter-spacing:2px}
+    .reason h3{font-family:Georgia,serif;font-size:27px;margin:18px 0 10px;font-weight:500}
+    .reason p{color:var(--muted);line-height:1.7;margin:0}
+    .reason .spark{position:absolute;right:18px;top:16px;font-size:28px;opacity:.25}
 
-  .floating-hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-  .heart{
-    position:absolute;
-    bottom:-35px;
-    width:18px;height:18px;
-    transform:rotate(45deg);
-    background:rgba(255,236,247,.85);
-    border-radius:4px;
-    filter:drop-shadow(0 0 8px rgba(255,255,255,.42));
-    animation:floatHeart var(--dur,8s) linear infinite;
-    animation-delay:var(--delay,0s);
-    opacity:0;
-  }
-  .heart::before,.heart::after{
-    content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:inherit
-  }
-  .heart::before{left:-9px}
-  .heart::after{top:-9px}
-  @keyframes floatHeart{
-    0%{transform:translate(0,0) rotate(45deg) scale(.65);opacity:0}
-    12%{opacity:.82}
-    55%{transform:translate(var(--drift,30px),-290px) rotate(62deg) scale(1)}
-    100%{transform:translate(calc(var(--drift,30px)*-.6),-610px) rotate(86deg) scale(.62);opacity:0}
-  }
+    .timeline{position:relative;margin-top:36px}
+    .timeline::before{
+      content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;
+      background:linear-gradient(transparent,var(--pink),var(--violet),transparent);
+    }
+    .moment{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;margin:0 0 18px}
+    .moment:nth-child(even) .moment-card{grid-column:3}
+    .moment:nth-child(even) .moment-dot{grid-column:2}
+    .moment:nth-child(odd) .moment-card{grid-column:1}
+    .moment:nth-child(odd) .moment-dot{grid-column:2}
+    .moment-card{padding:24px}
+    .moment-card small{color:var(--pink2)}
+    .moment-card h3{font-size:21px;margin:7px 0}
+    .moment-card p{color:var(--muted);line-height:1.6;margin:0}
+    .moment-dot{
+      grid-row:1;justify-self:center;width:18px;height:18px;border-radius:50%;
+      background:var(--pink);border:5px solid #1b0a17;box-shadow:0 0 0 1px rgba(255,130,180,.45),0 0 24px rgba(255,79,145,.5);
+    }
 
-  .scene-svg{
-    position:absolute;
-    width:min(720px,96%);
-    height:auto;
-    left:50%;
-    bottom:12px;
-    transform:translateX(-50%);
-    overflow:visible;
-    filter:drop-shadow(0 22px 19px rgba(92,40,76,.17));
-  }
+    .gallery-grid{display:grid;grid-template-columns:1.3fr .7fr .7fr;grid-auto-rows:230px;gap:13px}
+    .photo{
+      position:relative;overflow:hidden;border-radius:24px;border:1px solid rgba(255,255,255,.1);
+      background:
+        radial-gradient(circle at 25% 20%,rgba(255,130,180,.25),transparent 30%),
+        linear-gradient(135deg,#3b1730,#150914);
+    }
+    .photo:first-child{grid-row:span 2}
+    .photo img{width:100%;height:100%;object-fit:cover;display:none}
+    .photo.has-img img{display:block}
+    .photo.has-img .photo-placeholder{display:none}
+    .photo-placeholder{
+      position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:#e5b8ca;
+    }
+    .photo-placeholder b{display:block;color:white;font-size:30px;margin-bottom:8px}
+    .photo input{display:none}
+    .photo label{
+      position:absolute;left:12px;bottom:12px;z-index:3;padding:9px 12px;border-radius:999px;
+      color:white;background:rgba(10,5,11,.58);backdrop-filter:blur(12px);font-size:12px;border:1px solid rgba(255,255,255,.15);
+      cursor:pointer;
+    }
 
-  .character{
-    transform-box:fill-box;
-    transform-origin:center bottom;
-    transition:transform .75s cubic-bezier(.2,.8,.2,1);
-  }
+    .surprise-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .surprise{
+      padding:26px;text-align:left;min-height:230px;border:none;color:white;
+      position:relative;overflow:hidden;transition:.25s;
+    }
+    .surprise:hover{transform:translateY(-7px) scale(1.01)}
+    .surprise .emoji{font-size:34px}
+    .surprise h3{font-size:22px;margin:18px 0 8px}
+    .surprise p{color:var(--muted);line-height:1.6;margin:0}
+    .surprise .arrow{position:absolute;right:22px;bottom:20px;font-size:20px;color:var(--pink2)}
 
-  .boy .arm-left,.boy .arm-right,.girl .arm-left,.girl .arm-right,
-  .boy .head,.girl .head{
-    transform-box:fill-box;
-    transform-origin:50% 10%;
-    transition:transform .65s cubic-bezier(.2,.8,.2,1);
-  }
+    .open-when{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .envelope-card{
+      padding:24px 18px;text-align:center;min-height:190px;display:flex;flex-direction:column;
+      justify-content:center;align-items:center;transition:.25s;
+    }
+    .envelope-card:hover{transform:rotate(-1.5deg) translateY(-6px)}
+    .envelope-card button{
+      margin-top:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);
+      color:white;padding:9px 13px;border-radius:999px;
+    }
 
-  .boy .arm-left,.boy .arm-right,.girl .arm-left,.girl .arm-right{
-    transform-origin:50% 0%;
-  }
+    .scratch-wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .scratch-card{padding:22px}
+    .scratch-zone{
+      position:relative;height:260px;border-radius:22px;overflow:hidden;
+      display:grid;place-items:center;text-align:center;
+      background:radial-gradient(circle at 50% 40%,rgba(255,79,145,.28),transparent 32%),#1f0c1b;
+    }
+    .scratch-message{padding:25px;font-family:Georgia,serif;font-size:28px;line-height:1.4}
+    #scratchCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+    .scratch-card p{color:var(--muted);margin:14px 4px 0;line-height:1.6}
+    .wheel-card{padding:22px;display:flex;flex-direction:column}
+    .wheel{
+      width:220px;aspect-ratio:1;border-radius:50%;margin:8px auto 18px;
+      display:grid;place-items:center;text-align:center;padding:24px;
+      background:conic-gradient(#ff4f91 0 16.6%,#8d5dff 16.6% 33.2%,#ff174f 33.2% 49.8%,#ff9bc1 49.8% 66.4%,#7d4169 66.4% 83%,#d96dff 83% 100%);
+      border:8px solid rgba(255,255,255,.12);box-shadow:0 16px 45px rgba(0,0,0,.28);
+      transition:transform 2.7s cubic-bezier(.18,.73,.13,1);
+    }
+    .wheel span{
+      background:rgba(14,7,13,.72);backdrop-filter:blur(10px);padding:12px;border-radius:999px;
+      font-size:13px;max-width:150px;
+    }
+    .wheel-card .btn{align-self:center}
 
-  .name-tag{
-    font-weight:800;font-size:18px;fill:white;letter-spacing:.02em;
-    paint-order:stroke;stroke:rgba(86,38,76,.24);stroke-width:5px;stroke-linejoin:round
-  }
+    .promise{
+      text-align:center;padding:75px 22px;
+      background:
+        radial-gradient(circle at center,rgba(255,79,145,.18),transparent 35%);
+    }
+    .promise .rings{font-size:46px;letter-spacing:6px}
+    .promise blockquote{
+      margin:20px auto 0;max-width:800px;font-family:Georgia,serif;
+      font-size:clamp(25px,4vw,46px);line-height:1.35;font-style:italic;
+    }
+    .promise p{color:var(--muted)}
 
-  /* Idle motion */
-  .boy{animation:idleBoy 3.1s ease-in-out infinite}
-  .girl{animation:idleGirl 3.1s ease-in-out .16s infinite}
-  @keyframes idleBoy{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-5px)}}
-  @keyframes idleGirl{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-5px)}}
+    footer{text-align:center;padding:50px 20px 70px;color:#b98ca2}
+    footer .names{font-family:Georgia,serif;color:white;font-size:30px;margin-bottom:8px}
 
-  /* HUG */
-  .stage.action-hug .boy{animation:none;transform:translate(63px,-2px) rotate(2deg)}
-  .stage.action-hug .girl{animation:none;transform:translate(-63px,-2px) rotate(-2deg)}
-  .stage.action-hug .boy .arm-right{transform:rotate(-40deg) translate(-4px,-2px)}
-  .stage.action-hug .girl .arm-left{transform:rotate(40deg) translate(4px,-2px)}
-  .stage.action-hug .boy .head{transform:rotate(6deg)}
-  .stage.action-hug .girl .head{transform:rotate(-6deg)}
+    .modal{
+      position:fixed;inset:0;z-index:120;background:rgba(5,2,5,.72);backdrop-filter:blur(12px);
+      display:none;place-items:center;padding:20px;
+    }
+    .modal.show{display:grid;animation:fadeIn .22s ease both}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-card{
+      width:min(560px,100%);padding:30px;position:relative;text-align:center;
+      animation:pop .35s cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes pop{from{opacity:0;transform:scale(.86) translateY(20px)}to{opacity:1;transform:none}}
+    .modal-close{
+      position:absolute;right:14px;top:14px;width:38px;height:38px;border-radius:50%;
+      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:white;
+    }
+    .modal-card .modal-emoji{font-size:50px}
+    .modal-card h3{font-family:Georgia,serif;font-size:34px;margin:14px 0}
+    .modal-card p{color:#efd0dd;line-height:1.8;font-size:17px}
 
-  /* KISS */
-  .stage.action-kiss .boy{animation:none;transform:translate(82px,-3px) rotate(4deg)}
-  .stage.action-kiss .girl{animation:none;transform:translate(-82px,-3px) rotate(-4deg)}
-  .stage.action-kiss .boy .head{transform:rotate(10deg) translate(6px,0)}
-  .stage.action-kiss .girl .head{transform:rotate(-10deg) translate(-6px,0)}
-  .stage.action-kiss .boy .arm-right{transform:rotate(-28deg)}
-  .stage.action-kiss .girl .arm-left{transform:rotate(28deg)}
+    .intro{
+      position:fixed;inset:0;z-index:200;background:
+      radial-gradient(circle at 50% 45%,rgba(255,79,145,.22),transparent 30%),#0e060d;
+      display:grid;place-items:center;padding:20px;transition:opacity .8s ease, visibility .8s;
+    }
+    .intro.hide{opacity:0;visibility:hidden}
+    .intro-inner{text-align:center}
+    .intro .tiny{color:#eeb0c8;letter-spacing:3px;text-transform:uppercase;font-size:11px}
+    .intro h2{font-size:clamp(44px,9vw,95px);margin:10px 0 5px}
+    .intro .heart-trigger{
+      width:115px;height:115px;border-radius:50%;border:1px solid rgba(255,255,255,.13);
+      display:grid;place-items:center;margin:30px auto 14px;background:rgba(255,255,255,.05);
+      color:white;font-size:48px;box-shadow:0 0 55px rgba(255,79,145,.18);animation:heartbeat 1.25s infinite;
+    }
+    .intro p{color:var(--muted)}
 
-  /* HOLD HANDS */
-  .stage.action-hands .boy{animation:none;transform:translate(24px,0)}
-  .stage.action-hands .girl{animation:none;transform:translate(-24px,0)}
-  .stage.action-hands .boy .arm-right{transform:rotate(-52deg)}
-  .stage.action-hands .girl .arm-left{transform:rotate(52deg)}
+    #toast{
+      position:fixed;left:50%;bottom:24px;z-index:160;transform:translate(-50%,20px);
+      background:rgba(20,8,17,.88);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);
+      padding:12px 16px;border-radius:999px;color:white;opacity:0;pointer-events:none;transition:.25s;
+      max-width:calc(100% - 24px);text-align:center;
+    }
+    #toast.show{opacity:1;transform:translate(-50%,0)}
 
-  .kiss-pop{
-    position:absolute;
-    left:50%;top:41%;
-    transform:translate(-50%,-50%) scale(0);
-    font-size:52px;
-    filter:drop-shadow(0 8px 14px rgba(115,33,82,.2));
-    opacity:0;
-    pointer-events:none;
-  }
-  .action-kiss .kiss-pop{animation:kissPop 1.25s ease .35s both}
-  @keyframes kissPop{
-    0%{transform:translate(-50%,-50%) scale(0) rotate(-15deg);opacity:0}
-    45%{transform:translate(-50%,-50%) scale(1.2) rotate(8deg);opacity:1}
-    100%{transform:translate(-50%,-80%) scale(.85) rotate(0);opacity:0}
-  }
+    .cursor-heart{
+      position:fixed;z-index:150;pointer-events:none;font-size:14px;
+      animation:cursorPop .85s ease-out forwards;
+    }
+    @keyframes cursorPop{to{transform:translateY(-35px) scale(.2) rotate(30deg);opacity:0}}
 
-  .hug-glow{
-    position:absolute;left:50%;top:55%;width:220px;height:220px;border-radius:50%;
-    transform:translate(-50%,-50%) scale(.55);opacity:0;pointer-events:none;
-    background:radial-gradient(circle,rgba(255,255,255,.40),rgba(255,206,229,.17) 45%,transparent 70%);
-  }
-  .action-hug .hug-glow{animation:hugGlow 1.7s ease-in-out infinite}
-  @keyframes hugGlow{0%,100%{opacity:.28;transform:translate(-50%,-50%) scale(.8)}50%{opacity:.7;transform:translate(-50%,-50%) scale(1.2)}}
+    .secret-overlay{
+      position:fixed;inset:0;z-index:190;display:none;place-items:center;text-align:center;padding:20px;
+      background:radial-gradient(circle,rgba(255,79,145,.3),rgba(7,3,7,.96) 60%);
+    }
+    .secret-overlay.show{display:grid;animation:fadeIn .4s}
+    .secret-overlay h3{font-family:Georgia,serif;font-size:clamp(46px,9vw,105px);margin:0}
+    .secret-overlay p{color:#f6cddd;font-size:18px}
+    .secret-overlay button{margin-top:18px}
 
-  .hand-heart{
-    position:absolute;left:50%;top:57%;font-size:28px;opacity:0;pointer-events:none;
-    transform:translate(-50%,-50%) scale(.4)
-  }
-  .action-hands .hand-heart{animation:handHeart 1.4s ease-in-out infinite}
-  @keyframes handHeart{0%,100%{opacity:.2;transform:translate(-50%,-50%) scale(.7)}50%{opacity:1;transform:translate(-50%,-70%) scale(1.05)}}
+    .reveal{opacity:0;transform:translateY(26px);transition:.75s ease}
+    .reveal.visible{opacity:1;transform:none}
 
-  .cat{
-    position:absolute;
-    width:68px;height:68px;
-    bottom:58px;
-    filter:drop-shadow(0 8px 8px rgba(81,39,68,.18));
-    z-index:5;
-  }
-  .cat-left{left:10%;animation:catWalkLeft 8s ease-in-out infinite}
-  .cat-right{right:10%;animation:catWalkRight 9s ease-in-out .5s infinite}
-  .cat-mid{left:46%;bottom:32px;transform:scale(.72);animation:catBob 2.7s ease-in-out infinite}
-  @keyframes catWalkLeft{0%,100%{transform:translateX(0) rotate(-2deg)}50%{transform:translateX(115px) rotate(2deg)}}
-  @keyframes catWalkRight{0%,100%{transform:translateX(0) rotate(2deg)}50%{transform:translateX(-115px) rotate(-2deg)}}
-  @keyframes catBob{0%,100%{transform:scale(.72) translateY(0)}50%{transform:scale(.72) translateY(-8px)}}
-
-  .message-card{
-    position:absolute;
-    left:50%;
-    bottom:18px;
-    transform:translateX(-50%);
-    z-index:7;
-    min-width:min(520px,calc(100% - 32px));
-    max-width:680px;
-    text-align:center;
-    padding:11px 18px 12px;
-    border-radius:17px;
-    background:rgba(83,37,82,.24);
-    border:1px solid rgba(255,255,255,.20);
-    backdrop-filter:blur(13px);
-    box-shadow:0 10px 30px rgba(85,31,66,.12);
-  }
-  .message-title{font-weight:850;font-size:15px}
-  .message-text{font-size:12px;opacity:.85;margin-top:3px}
-
-  .controls{
-    position:relative;
-    z-index:10;
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:10px;
-    padding:17px 18px 24px;
-  }
-  button{
-    appearance:none;border:1px solid rgba(255,255,255,.34);
-    background:rgba(255,255,255,.15);color:white;
-    border-radius:15px;padding:11px 16px;
-    font:inherit;font-size:13px;font-weight:800;
-    cursor:pointer;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 7px 18px rgba(91,33,72,.11);
-    transition:.22s ease;
-  }
-  button:hover{transform:translateY(-2px);background:rgba(255,255,255,.24);box-shadow:0 10px 24px rgba(91,33,72,.15)}
-  button:active{transform:translateY(0) scale(.98)}
-  button.active{background:rgba(255,255,255,.34);border-color:rgba(255,255,255,.58)}
-  button.primary{
-    background:linear-gradient(135deg,rgba(255,255,255,.32),rgba(255,221,239,.19));
-    border-color:rgba(255,255,255,.52)
-  }
-
-  .burst-heart{
-    position:absolute;
-    z-index:20;
-    pointer-events:none;
-    animation:burst 1.6s cubic-bezier(.15,.8,.25,1) forwards;
-    font-size:var(--size,22px);
-    left:50%;top:50%;
-    filter:drop-shadow(0 6px 9px rgba(85,25,60,.16));
-  }
-  @keyframes burst{
-    0%{transform:translate(-50%,-50%) scale(.2) rotate(0);opacity:0}
-    18%{opacity:1}
-    100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.15) rotate(var(--r));opacity:0}
-  }
-
-  .tip{
-    text-align:center;
-    font-size:11px;
-    opacity:.66;
-    padding:0 20px 20px;
-    position:relative;z-index:5;
-  }
-
-  @media (max-width:760px){
-    body{padding:0}
-    .game{min-height:100vh;border-radius:0;border-left:0;border-right:0}
-    header{padding:20px 18px 8px;display:block}
-    .score{margin-top:14px;width:100%;min-width:0}
-    .stage{margin:8px 10px 0;height:500px}
-    .scene-svg{width:790px;max-width:none;left:50%;bottom:28px}
-    .cat{width:54px;height:54px;bottom:74px}
-    .cat-left{left:2%}.cat-right{right:2%}.cat-mid{bottom:55px}
-    .message-card{bottom:12px}
-    .controls{padding-bottom:16px}
-  }
-
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
-  }
-</style>
+    @media(max-width:850px){
+      .nav{display:none}
+      .letter-layout,.scratch-wrap{grid-template-columns:1fr}
+      .reasons-grid,.surprise-grid{grid-template-columns:1fr 1fr}
+      .open-when{grid-template-columns:1fr 1fr}
+      .gallery-grid{grid-template-columns:1fr 1fr;grid-auto-rows:200px}
+      .gallery-grid .photo:first-child{grid-row:span 1;grid-column:span 2}
+      .counters{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){
+      h1{letter-spacing:-2px}
+      section{padding:70px 16px}
+      .reasons-grid,.surprise-grid,.open-when{grid-template-columns:1fr}
+      .gallery-grid{grid-template-columns:1fr;grid-auto-rows:230px}
+      .gallery-grid .photo:first-child{grid-column:span 1}
+      .timeline::before{left:18px}
+      .moment{grid-template-columns:36px 1fr}
+      .moment:nth-child(n) .moment-dot{grid-column:1;grid-row:1;justify-self:start}
+      .moment:nth-child(n) .moment-card{grid-column:2}
+      .topbar{justify-content:space-between}
+      .brand{font-size:14px}
+      .hero{padding-top:120px}
+      .letter{padding:26px}
+    }
+  </style>
 </head>
 <body>
-<div class="page-glow"></div>
+  <div class="noise"></div>
 
-<main class="game" aria-label="Abdullah ve Elif sevgi oyunu">
-  <header>
-    <div class="title-wrap">
-      <div class="eyebrow">Mini co-op love quest</div>
-      <h1>Abdullah <span style="opacity:.68">♥</span> Elif</h1>
-      <p class="subtitle">Bazen küçük bir tartışma olur; ama doğru takım arkadaşını bulduysan oyun devam eder. Bu bölümün görevi: gülümsetmek, sarılmak ve barışı %100’e tamamlamak.</p>
+  <div class="intro" id="intro">
+    <div class="intro-inner">
+      <div class="tiny">Sadece iki kişi için hazırlanmış küçük bir evren</div>
+      <h2>Abdullah <span style="color:var(--pink)">♥</span> Elif</h2>
+      <button class="heart-trigger" id="enterBtn" aria-label="Hikâyeye gir">♥</button>
+      <p>Kalbe dokun. Hikâyemiz başlasın.</p>
     </div>
-    <div class="score" aria-label="Barış puanı">
-      <div class="score-top"><span>Barış Puanı</span><span id="scoreText">92%</span></div>
-      <div class="meter"><span id="meterFill"></span></div>
+  </div>
+
+  <div class="topbar">
+    <div class="brand">A <span>♥</span> E</div>
+    <nav class="nav">
+      <a href="#mektup">Mektup</a>
+      <a href="#nedenler">Neden Sen?</a>
+      <a href="#anilar">Anılar</a>
+      <a href="#surpriz">Sürpriz</a>
+    </nav>
+    <button class="icon-btn" id="musicBtn" title="Müziği aç/kapat" aria-label="Müziği aç veya kapat">♫</button>
+  </div>
+
+  <header class="hero">
+    <div class="hero-orbit"></div>
+    <div class="hero-inner">
+      <div class="eyebrow"><span class="dot"></span> iki kalp, tek hikâye</div>
+      <h1>Abdullah <span class="amp">&</span> Elif</h1>
+      <p class="hero-sub" id="typeText"></p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#mektup" style="text-decoration:none">Hikâyemize Gir ♥</a>
+        <button class="btn" id="randomLove">Bana Bir Şey Söyle</button>
+      </div>
     </div>
+    <div class="scrollhint">aşağı kaydır</div>
   </header>
 
-  <section class="stage action-hug" id="stage">
-    <div class="moon"></div>
-    <div class="hill"></div>
-    <div class="hill two"></div>
+  <main>
+    <section id="mektup">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Elif'e küçük bir mektup</div>
+          <h2>İyi ki sen.</h2>
+          <p>Bazen bir insanın hayatına gelişi, bütün cümlelerin anlamını değiştirir. Bu sayfa da o değişimin küçük bir hatırası.</p>
+        </div>
 
-    <div class="sparkles" id="sparkles"></div>
-    <div class="floating-hearts" id="floatingHearts"></div>
-    <div class="hug-glow"></div>
-    <div class="kiss-pop">💗</div>
-    <div class="hand-heart">💞</div>
+        <div class="letter-layout">
+          <article class="glass letter reveal">
+            <p>
+              Elif,<br><br>
+              Bu sayfada gördüğün her kalp, her ışık ve her küçük sürpriz aslında tek bir şeyi söylemek için burada:
+              <strong>hayatımda olduğun için çok mutluyum.</strong>
+            </p>
+            <p>
+              Seninle sıradan bir gün bile başka hissettiriyor. Birlikte güldüğümüz anlar, saçma şeylere takılıp kaldığımız dakikalar,
+              konuşmadan bile anlaşabildiğimiz o küçük anlar… Hepsi benim için birer hatıra değil, kendimi ait hissettiğim yerler.
+            </p>
+            <p>
+              Geleceğin ne getireceğini bilmiyorum; ama bildiğim bir şey var: aynı hikâyede seninle yan yana olmak,
+              her yeni sayfayı daha güzel yapıyor.
+            </p>
+            <div class="signature">— Abdullah</div>
+          </article>
 
-    <!-- Kedi 1 -->
-    <svg class="cat cat-left" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M28 37 20 18 40 30M72 37l8-19-20 12" fill="#f7d0a4" stroke="#6a4961" stroke-width="4" stroke-linejoin="round"/>
-      <ellipse cx="50" cy="53" rx="31" ry="26" fill="#f7d0a4" stroke="#6a4961" stroke-width="4"/>
-      <circle cx="39" cy="49" r="4" fill="#4b3951"/><circle cx="61" cy="49" r="4" fill="#4b3951"/>
-      <path d="M47 58h6l-3 4z" fill="#e98594"/><path d="M50 62c-4 5-8 5-11 1m11-1c4 5 8 5 11 1" fill="none" stroke="#6a4961" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M23 59 7 55m17 10L8 68m69-9 16-4m-17 10 16 4" stroke="#6a4961" stroke-width="2" stroke-linecap="round"/>
-      <path d="M76 71c16 7 17 20 7 22-8 2-12-6-6-10" fill="none" stroke="#6a4961" stroke-width="4" stroke-linecap="round"/>
-    </svg>
+          <aside class="glass mini-card reveal">
+            <div class="big-heart">♥</div>
+            <strong>Bu kalp Elif için atıyor.</strong>
+            <small>Üzerine birkaç kez tıklamayı dene. Bazı şeyler ilk bakışta görünmez.</small>
+            <button class="btn" id="heartSecret" style="margin-top:18px">Kalbe Dokun</button>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-    <!-- Kedi 2 -->
-    <svg class="cat cat-right" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M28 37 20 18 40 30M72 37l8-19-20 12" fill="#c6cbd7" stroke="#5c5267" stroke-width="4" stroke-linejoin="round"/>
-      <ellipse cx="50" cy="53" rx="31" ry="26" fill="#c6cbd7" stroke="#5c5267" stroke-width="4"/>
-      <circle cx="39" cy="49" r="4" fill="#413b49"/><circle cx="61" cy="49" r="4" fill="#413b49"/>
-      <path d="M47 58h6l-3 4z" fill="#e98594"/><path d="M50 62c-4 5-8 5-11 1m11-1c4 5 8 5 11 1" fill="none" stroke="#5c5267" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M23 59 7 55m17 10L8 68m69-9 16-4m-17 10 16 4" stroke="#5c5267" stroke-width="2" stroke-linecap="round"/>
-      <path d="M76 71c16 7 17 20 7 22-8 2-12-6-6-10" fill="none" stroke="#5c5267" stroke-width="4" stroke-linecap="round"/>
-    </svg>
+    <section>
+      <div class="wrap">
+        <div class="glass counter-card reveal">
+          <div class="date-row">
+            <div>
+              <div class="kicker">Bizim zamanımız</div>
+              <p>Başlangıç tarihinizi seç; sayaç o günden beri geçen zamanı hesaplasın.</p>
+            </div>
+            <input class="date-input" id="startDate" type="date" value="2025-01-01">
+          </div>
+          <div class="counters">
+            <div class="count-box"><b id="days">0</b><span>Gün</span></div>
+            <div class="count-box"><b id="hours">0</b><span>Saat</span></div>
+            <div class="count-box"><b id="minutes">0</b><span>Dakika</span></div>
+            <div class="count-box"><b id="seconds">0</b><span>Saniye</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <!-- Kedi 3 -->
-    <svg class="cat cat-mid" viewBox="0 0 100 100" aria-hidden="true">
-      <path d="M28 37 20 18 40 30M72 37l8-19-20 12" fill="#fff3e6" stroke="#80526d" stroke-width="4" stroke-linejoin="round"/>
-      <ellipse cx="50" cy="53" rx="31" ry="26" fill="#fff3e6" stroke="#80526d" stroke-width="4"/>
-      <circle cx="39" cy="49" r="4" fill="#563b50"/><circle cx="61" cy="49" r="4" fill="#563b50"/>
-      <path d="M47 58h6l-3 4z" fill="#e98594"/><path d="M50 62c-4 5-8 5-11 1m11-1c4 5 8 5 11 1" fill="none" stroke="#80526d" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>
+    <section id="nedenler">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Neden sen?</div>
+          <h2>Sende sevdiğim şeyler.</h2>
+          <p>Bunlar sadece başlangıç. Kartların üzerine gel; küçük detaylar da sana eşlik etsin.</p>
+        </div>
 
-    <!-- Ana karakterler -->
-    <svg class="scene-svg" viewBox="0 0 760 460" role="img" aria-label="Abdullah ve Elif karakterleri">
-      <defs>
-        <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffd2b7"/>
-          <stop offset="100%" stop-color="#efaa8d"/>
-        </linearGradient>
-        <linearGradient id="pants" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4c86e0"/>
-          <stop offset="100%" stop-color="#2c5ca7"/>
-        </linearGradient>
-        <linearGradient id="shirtOrange" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ff9d46"/>
-          <stop offset="100%" stop-color="#e97822"/>
-        </linearGradient>
-        <linearGradient id="shirtGray" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#a6abb2"/>
-          <stop offset="100%" stop-color="#737a84"/>
-        </linearGradient>
-      </defs>
+        <div class="reasons-grid">
+          <div class="glass reason reveal"><span class="spark">✦</span><span class="num">01</span><h3>Gülüşün</h3><p>Bir anda bütün günün havasını değiştirebilen, benim için dünyanın en tanıdık ve en güzel sesi gibi.</p></div>
+          <div class="glass reason reveal"><span class="spark">♡</span><span class="num">02</span><h3>Yanımda oluşun</h3><p>Bazen çözüm söylemeden, sadece orada olarak bile her şeyi daha hafif hale getiriyorsun.</p></div>
+          <div class="glass reason reveal"><span class="spark">☾</span><span class="num">03</span><h3>Bakışların</h3><p>Bazen tek bir bakışta uzun uzun konuşmuş gibi hissettiren o sessiz anlaşmalarımız.</p></div>
+          <div class="glass reason reveal"><span class="spark">∞</span><span class="num">04</span><h3>Biz oluşumuz</h3><p>İki ayrı insan olup yine de aynı yerde buluşabilmek. Benim en sevdiğim denklem.</p></div>
+          <div class="glass reason reveal"><span class="spark">✧</span><span class="num">05</span><h3>Detayların</h3><p>Belki başkasının fark etmeyeceği ama benim sende sevdiğim o küçük alışkanlıkların, mimiklerin, kelimelerin.</p></div>
+          <div class="glass reason reveal"><span class="spark">♥</span><span class="num">06</span><h3>Sen olman</h3><p>Hepsinden önemlisi: başka biri gibi olmaya çalışmadan, sadece Elif olduğun için.</p></div>
+        </div>
+      </div>
+    </section>
 
-      <!-- zemin -->
-      <ellipse cx="380" cy="425" rx="250" ry="28" fill="rgba(99,42,91,.14)"/>
+    <section id="anilar">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Bizim küçük zaman çizgimiz</div>
+          <h2>Birlikte biriktirdiklerimiz.</h2>
+          <p>Aşağıdaki metinleri kendi gerçek tarihleriniz ve anılarınızla değiştirebilirsin. Dosya tek HTML olduğu için düzenlemesi de kolay.</p>
+        </div>
 
-      <!-- ABDULLAH -->
-      <g class="character boy">
-        <text class="name-tag" x="252" y="55" text-anchor="middle">Abdullah</text>
+        <div class="timeline">
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>Birinci bölüm</small><h3>İlk karşılaşma</h3><p>Her şeyin henüz “biz” olmadığı ama hikâyenin sessizce başladığı o gün.</p></div><div class="moment-dot"></div>
+          </div>
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>İkinci bölüm</small><h3>İlk uzun sohbet</h3><p>Zamanın nasıl geçtiğini fark etmediğimiz; bir konuşmanın diğerine karıştığı gecelerden biri.</p></div><div class="moment-dot"></div>
+          </div>
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>Üçüncü bölüm</small><h3>“Biz” olduğumuz an</h3><p>İki ayrı hikâyenin aynı cümlede buluştuğu bölüm.</p></div><div class="moment-dot"></div>
+          </div>
+          <div class="moment reveal">
+            <div class="glass moment-card"><small>Devam ediyor…</small><h3>Bugün</h3><p>Hikâyenin en güzel yanı: henüz bitmiş olmaması.</p></div><div class="moment-dot"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <!-- bacaklar -->
-        <path d="M207 300 Q215 286 242 286 L259 286 L253 390 Q252 410 234 410 L218 410 Q207 408 210 392Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
-        <path d="M259 286 Q287 286 296 301 L296 392 Q299 408 285 410 L267 410 Q253 408 254 390Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
-        <path d="M206 402 Q227 397 250 403 L248 418 Q226 426 201 417Z" fill="#edf0f4" stroke="#68566b" stroke-width="4"/>
-        <path d="M258 403 Q278 397 300 402 L304 416 Q282 426 257 418Z" fill="#edf0f4" stroke="#68566b" stroke-width="4"/>
+    <section id="fotograflar">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Bizden kareler</div>
+          <h2>Fotoğraflarımız.</h2>
+          <p>Her kutudaki “Fotoğraf ekle” düğmesine basıp kendi fotoğraflarınızı seçebilirsiniz. Görseller sadece tarayıcıda açılır; hiçbir yere yüklenmez.</p>
+        </div>
 
-        <!-- torso gri polo -->
-        <path d="M202 175 Q226 159 250 161 Q281 160 305 178 L298 291 Q283 302 252 302 Q218 301 202 290Z" fill="url(#shirtGray)" stroke="#5c626a" stroke-width="4"/>
-        <!-- polo yaka -->
-        <path d="M233 164 251 181 268 163 278 171 260 195 250 185 240 196 224 171Z" fill="#8b919a" stroke="#5c626a" stroke-width="3"/>
-        <path d="M251 181v31" stroke="#606771" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="251" cy="196" r="2.5" fill="#545a64"/><circle cx="251" cy="205" r="2.5" fill="#545a64"/>
+        <div class="gallery-grid">
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>♡</b>En sevdiğiniz fotoğrafı buraya koyun</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>✦</b>Bir anı daha</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>☾</b>Bir gece, bir gülüş</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>∞</b>Birlikte</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+          <div class="photo reveal"><img alt="Bizim fotoğrafımız"><div class="photo-placeholder"><div><b>♥</b>Biz</div></div><label>Fotoğraf ekle<input type="file" accept="image/*"></label></div>
+        </div>
+      </div>
+    </section>
 
-        <!-- kollar -->
-        <g class="arm-left">
-          <path d="M207 182 Q192 182 183 207 L170 260 Q167 275 181 279 Q194 282 200 264 L216 215 Q220 194 207 182Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-          <path d="M210 180 Q193 178 186 198 L182 214 207 222 219 194Z" fill="url(#shirtGray)" stroke="#5c626a" stroke-width="4"/>
-          <circle cx="176" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-        </g>
+    <section id="surpriz">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">Dokun ve aç</div>
+          <h2>Küçük sürprizler.</h2>
+          <p>Bazı cümleler saklanınca daha güzel oluyor.</p>
+        </div>
 
-        <g class="arm-right">
-          <path d="M297 183 Q311 183 319 207 L333 260 Q337 275 323 279 Q309 282 304 264 L288 215 Q283 194 297 183Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-          <path d="M296 180 Q313 178 320 198 L325 214 300 222 286 194Z" fill="url(#shirtGray)" stroke="#5c626a" stroke-width="4"/>
-          <circle cx="327" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-        </g>
+        <div class="surprise-grid">
+          <button class="glass surprise reveal" data-modal="s1"><span class="emoji">🌙</span><h3>Gece mesajı</h3><p>Uykudan önce açılmak üzere saklanmış küçük bir cümle.</p><span class="arrow">↗</span></button>
+          <button class="glass surprise reveal" data-modal="s2"><span class="emoji">💌</span><h3>Acil sevgi dozu</h3><p>Kötü bir gün geçiriyorsan özellikle buraya bas.</p><span class="arrow">↗</span></button>
+          <button class="glass surprise reveal" data-modal="s3"><span class="emoji">✨</span><h3>Gelecekten not</h3><p>Bir gün dönüp baktığımızda hatırlamamız gereken şey.</p><span class="arrow">↗</span></button>
+        </div>
+      </div>
+    </section>
 
-        <!-- boyun -->
-        <path d="M237 158v21q14 14 29 0v-22" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
+    <section>
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="kicker">“Şu zaman aç” mektupları</div>
+          <h2>İhtiyacın olduğunda.</h2>
+        </div>
+        <div class="open-when">
+          <div class="glass envelope-card reveal"><div style="font-size:38px">☁️</div><b>Kötü bir gün geçirdiğinde</b><button data-open="bad">Aç</button></div>
+          <div class="glass envelope-card reveal"><div style="font-size:38px">🥹</div><b>Beni özlediğinde</b><button data-open="miss">Aç</button></div>
+          <div class="glass envelope-card reveal"><div style="font-size:38px">😂</div><b>Gülmek istediğinde</b><button data-open="laugh">Aç</button></div>
+          <div class="glass envelope-card reveal"><div style="font-size:38px">🫶</div><b>Kendinden şüphe ettiğinde</b><button data-open="doubt">Aç</button></div>
+        </div>
+      </div>
+    </section>
 
-        <!-- kafa -->
-        <g class="head">
-          <ellipse cx="251" cy="121" rx="49" ry="52" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-          <!-- saç -->
-          <path d="M205 117q-6-57 48-59 50 1 45 56-11-21-28-27-25 11-60 7z" fill="#4b352e" stroke="#3d2b27" stroke-width="4"/>
-          <path d="M212 90q13-25 42-25 23 0 37 20-22-12-41-7-18 5-38 12z" fill="#5b4037"/>
-          <!-- kulak -->
-          <ellipse cx="204" cy="126" rx="9" ry="14" fill="url(#skin)" stroke="#9e695c" stroke-width="3"/>
-          <ellipse cx="298" cy="126" rx="9" ry="14" fill="url(#skin)" stroke="#9e695c" stroke-width="3"/>
-          <!-- yüz -->
-          <path d="M224 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M262 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
-          <ellipse cx="233" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
-          <ellipse cx="270" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
-          <path d="M247 128q-3 10 5 10" fill="none" stroke="#b77a6d" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M238 146q13 10 27 0" fill="none" stroke="#9e5368" stroke-width="3.5" stroke-linecap="round"/>
-          <ellipse cx="219" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".35"/>
-          <ellipse cx="283" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".35"/>
-        </g>
-      </g>
+    <section>
+      <div class="wrap">
+        <div class="scratch-wrap">
+          <div class="glass scratch-card reveal">
+            <div class="section-head" style="margin-bottom:18px">
+              <div class="kicker">Kazı ve keşfet</div>
+              <h2 style="font-size:42px">Gizli mesaj</h2>
+            </div>
+            <div class="scratch-zone" id="scratchZone">
+              <div class="scratch-message">“Seni seçtiğim için değil, her gün yeniden seçmek istediğim için seviyorum.”</div>
+              <canvas id="scratchCanvas"></canvas>
+            </div>
+            <p>Fareyle veya parmağınla gri yüzeyi kazı. Altındaki mesaj tamamen sana ait.</p>
+          </div>
 
-      <!-- ELIF -->
-      <g class="character girl">
-        <text class="name-tag" x="508" y="55" text-anchor="middle">Elif</text>
+          <div class="glass wheel-card reveal">
+            <div class="section-head" style="margin-bottom:12px">
+              <div class="kicker">Bugünün mini kararı</div>
+              <h2 style="font-size:42px">Aşk çarkı</h2>
+            </div>
+            <div class="wheel" id="wheel"><span id="wheelText">Çarkı çevir ♥</span></div>
+            <button class="btn primary" id="spinBtn">Bugün ne yapıyoruz?</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        <!-- bacaklar -->
-        <path d="M463 300 Q470 286 497 286 L514 286 L509 390 Q508 410 490 410 L474 410 Q463 408 466 392Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
-        <path d="M514 286 Q542 286 551 301 L551 392 Q554 408 540 410 L522 410 Q508 408 509 390Z" fill="url(#pants)" stroke="#37517b" stroke-width="4"/>
-        <path d="M461 402 Q482 397 505 403 L503 418 Q481 426 456 417Z" fill="#f9edf4" stroke="#75556a" stroke-width="4"/>
-        <path d="M513 403 Q533 397 555 402 L559 416 Q537 426 512 418Z" fill="#f9edf4" stroke="#75556a" stroke-width="4"/>
+    <section class="promise reveal">
+      <div class="wrap">
+        <div class="rings">∞ ♥ ∞</div>
+        <blockquote>
+          “Hikâyemizin en sevdiğim kısmı geçmişimiz değil; birlikte yazacağımız bütün o boş sayfalar.”
+        </blockquote>
+        <p>Abdullah → Elif</p>
+      </div>
+    </section>
+  </main>
 
-        <!-- turuncu gömlek -->
-        <path d="M458 176 Q480 160 508 161 Q539 160 561 177 L554 291 Q537 303 507 303 Q477 303 457 290Z" fill="url(#shirtOrange)" stroke="#c2611c" stroke-width="4"/>
-        <path d="M482 164q25 20 51 0" fill="none" stroke="#f8ae68" stroke-width="7" stroke-linecap="round"/>
-        <path d="M481 218q27 9 54 0" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="4"/>
+  <footer>
+    <div class="names">Abdullah ♥ Elif</div>
+    <div>Bir HTML dosyasına sığdırılmış kocaman bir “iyi ki”.</div>
+    <div style="margin-top:8px;font-size:12px;opacity:.75">Kalbe 7 kez dokunmayı unutma.</div>
+  </footer>
 
-        <!-- kollar -->
-        <g class="arm-left">
-          <path d="M463 183 Q448 183 440 207 L425 261 Q421 275 435 279 Q448 282 454 265 L470 215 Q475 194 463 183Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-          <path d="M462 181 Q445 179 439 198 L434 215 459 223 473 194Z" fill="url(#shirtOrange)" stroke="#c2611c" stroke-width="4"/>
-          <circle cx="430" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-        </g>
-
-        <g class="arm-right">
-          <path d="M554 183 Q569 183 577 207 L591 261 Q595 275 581 279 Q568 282 562 265 L546 215 Q541 194 554 183Z" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-          <path d="M555 181 Q572 179 578 198 L583 215 558 223 544 194Z" fill="url(#shirtOrange)" stroke="#c2611c" stroke-width="4"/>
-          <circle cx="586" cy="274" r="12" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-        </g>
-
-        <!-- boyun -->
-        <path d="M493 158v21q14 14 29 0v-22" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-
-        <!-- kafa -->
-        <g class="head">
-          <!-- saç arkası -->
-          <path d="M458 112q-5-55 49-57 53 1 52 60l-7 64q-18 24-39 8-28 17-50-9z" fill="#4a302f" stroke="#3a2528" stroke-width="4"/>
-          <ellipse cx="508" cy="121" rx="48" ry="52" fill="url(#skin)" stroke="#9e695c" stroke-width="4"/>
-          <!-- saç üst -->
-          <path d="M462 110q-3-47 47-52 39 4 46 42-26-18-55-15-16 16-38 25z" fill="#573536"/>
-          <path d="M502 64q-20 22-39 30" fill="none" stroke="#6b4143" stroke-width="5" stroke-linecap="round"/>
-          <!-- yüz -->
-          <path d="M480 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M518 116q8-6 17 0" fill="none" stroke="#4a3741" stroke-width="3.5" stroke-linecap="round"/>
-          <ellipse cx="489" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
-          <ellipse cx="526" cy="122" rx="4.2" ry="5.2" fill="#49333b"/>
-          <path d="M503 128q-3 10 5 10" fill="none" stroke="#b77a6d" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M494 146q13 10 27 0" fill="none" stroke="#a64f68" stroke-width="3.5" stroke-linecap="round"/>
-          <ellipse cx="475" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".38"/>
-          <ellipse cx="539" cy="138" rx="9" ry="5" fill="#ef8c9b" opacity=".38"/>
-        </g>
-      </g>
-    </svg>
-
-    <div class="message-card">
-      <div class="message-title" id="messageTitle">Sarılma modu aktif 🤍</div>
-      <div class="message-text" id="messageText">Görev: küçük tartışmayı büyük bir sarılmayla kapat.</div>
+  <div class="modal" id="modal">
+    <div class="glass modal-card">
+      <button class="modal-close" id="modalClose">×</button>
+      <div class="modal-emoji" id="modalEmoji">💌</div>
+      <h3 id="modalTitle">Başlık</h3>
+      <p id="modalText">Mesaj</p>
     </div>
-  </section>
-
-  <div class="controls" role="group" aria-label="Animasyon kontrolleri">
-    <button data-action="hug" class="active">🤍 Sarıl</button>
-    <button data-action="kiss">💗 Öpücük</button>
-    <button data-action="hands">🤝 El Ele</button>
-    <button data-action="idle">✨ Yan Yana</button>
-    <button class="primary" id="surpriseBtn">💞 Barış Sürprizi</button>
   </div>
-  <div class="tip">İpucu: Animasyonlar kendiliğinden sırayla değişir; istersen butonlarla istediğin anı seçebilirsin.</div>
-</main>
 
-<script>
-(() => {
-  const stage = document.getElementById('stage');
-  const buttons = [...document.querySelectorAll('button[data-action]')];
-  const title = document.getElementById('messageTitle');
-  const text = document.getElementById('messageText');
-  const scoreText = document.getElementById('scoreText');
-  const meter = document.getElementById('meterFill');
-  const surpriseBtn = document.getElementById('surpriseBtn');
+  <div class="secret-overlay" id="secretOverlay">
+    <div>
+      <div style="font-size:70px;animation:heartbeat 1.2s infinite">♥</div>
+      <h3>ELİF + ABDULLAH</h3>
+      <p>Gizli bölüm bulundu. Resmî sonuç: Bu hikâyede kalpler aynı tarafta.</p>
+      <button class="btn primary" id="closeSecret">Bizim hikâyemize dön</button>
+    </div>
+  </div>
 
-  const actions = {
-    hug: {
-      className: 'action-hug',
-      title: 'Sarılma modu aktif 🤍',
-      text: 'Görev: küçük tartışmayı büyük bir sarılmayla kapat.',
-      score: 96
-    },
-    kiss: {
-      className: 'action-kiss',
-      title: 'Öpücük kombosu! 💗',
-      text: 'Bonus puan: sevgi + sabır + minik bir gülümseme.',
-      score: 99
-    },
-    hands: {
-      className: 'action-hands',
-      title: 'El ele, aynı takım 🤝',
-      text: 'Co-op modu: problem karşıda, siz aynı taraftasınız.',
-      score: 100
-    },
-    idle: {
-      className: 'action-idle',
-      title: 'Yan yana modu ✨',
-      text: 'Bazen hiçbir şey söylemeden yanında durmak da yeter.',
-      score: 94
+  <div id="toast"></div>
+
+  <script>
+    // -----------------------------
+    // 1) Arka plandaki uçuşan kalpler
+    // -----------------------------
+    const hearts = ["♥","♡","❤","✦"];
+    for(let i=0;i<22;i++){
+      const h=document.createElement("div");
+      h.className="floating-heart";
+      h.textContent=hearts[Math.floor(Math.random()*hearts.length)];
+      h.style.setProperty("--x",Math.random()*100+"vw");
+      h.style.setProperty("--s",(10+Math.random()*20)+"px");
+      h.style.setProperty("--d",(11+Math.random()*18)+"s");
+      h.style.setProperty("--delay",(-Math.random()*25)+"s");
+      h.style.setProperty("--drift",(-80+Math.random()*160)+"px");
+      h.style.color=Math.random()>.35?"#ff6ea5":"#c792ff";
+      document.body.appendChild(h);
     }
-  };
 
-  let current = 'hug';
-  let autoIndex = 0;
-  let autoTimer;
+    // -----------------------------
+    // 2) Açılış ekranı
+    // -----------------------------
+    const intro=document.getElementById("intro");
+    document.getElementById("enterBtn").addEventListener("click",()=>{
+      intro.classList.add("hide");
+      burst(window.innerWidth/2,window.innerHeight/2,34);
+      setTimeout(()=>document.getElementById("typeText").classList.add("ready"),300);
+    });
 
-  function setAction(action, userTriggered = false){
-    const data = actions[action];
-    current = action;
-    stage.classList.remove('action-hug','action-kiss','action-hands','action-idle');
-    stage.classList.add(data.className);
-
-    buttons.forEach(btn => btn.classList.toggle('active', btn.dataset.action === action));
-    title.textContent = data.title;
-    text.textContent = data.text;
-    scoreText.textContent = data.score + '%';
-    meter.style.width = data.score + '%';
-
-    if(action !== 'idle') heartBurst(action === 'kiss' ? 13 : 8);
-    if(userTriggered) restartAuto();
-  }
-
-  function restartAuto(){
-    clearInterval(autoTimer);
-    autoTimer = setInterval(() => {
-      const seq = ['hug','hands','kiss','idle'];
-      autoIndex = (autoIndex + 1) % seq.length;
-      setAction(seq[autoIndex], false);
-    }, 5600);
-  }
-
-  buttons.forEach(btn => btn.addEventListener('click', () => setAction(btn.dataset.action, true)));
-
-  function heartBurst(count = 12){
-    const glyphs = ['♥','♡','💗','✦','💕'];
-    for(let i=0;i<count;i++){
-      const el = document.createElement('span');
-      el.className = 'burst-heart';
-      el.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
-      const angle = (Math.PI*2/count)*i + Math.random()*.35;
-      const dist = 90 + Math.random()*170;
-      el.style.setProperty('--x', Math.cos(angle)*dist + 'px');
-      el.style.setProperty('--y', Math.sin(angle)*dist + 'px');
-      el.style.setProperty('--r', (Math.random()*100-50)+'deg');
-      el.style.setProperty('--size', (14+Math.random()*23)+'px');
-      el.style.color = Math.random() > .45 ? '#fff2f8' : '#ffd0e4';
-      stage.appendChild(el);
-      setTimeout(() => el.remove(), 1700);
+    // -----------------------------
+    // 3) Yazı yazma efekti
+    // -----------------------------
+    const sentence="Bazı insanlar hayatına gelir. Bazılarıysa hayatının anlamını değiştirir. Elif, benim için ikinci cümlesin.";
+    const typeEl=document.getElementById("typeText");
+    let ti=0;
+    function typeWriter(){
+      if(ti<=sentence.length){
+        typeEl.textContent=sentence.slice(0,ti++);
+        setTimeout(typeWriter, ti<55 ? 34 : 24);
+      }
     }
-  }
+    setTimeout(typeWriter,900);
 
-  surpriseBtn.addEventListener('click', () => {
-    const seq = ['hug','kiss','hands','kiss'];
-    let i = 0;
-    clearInterval(autoTimer);
-    surpriseBtn.disabled = true;
-    surpriseBtn.textContent = '💖 Barış tamamlanıyor...';
-    const play = () => {
-      setAction(seq[i], false);
-      heartBurst(18);
-      i++;
-      if(i < seq.length){
-        setTimeout(play, 1250);
-      } else {
-        setTimeout(() => {
-          scoreText.textContent = '100%';
-          meter.style.width = '100%';
-          title.textContent = 'Görev tamamlandı: Abdullah + Elif 💞';
-          text.textContent = 'Küçük tartışmalar geçer; güzel olan yine birbirinizi seçmeniz.';
-          surpriseBtn.disabled = false;
-          surpriseBtn.textContent = '💞 Barış Sürprizi';
-          restartAuto();
-        }, 1400);
+    // -----------------------------
+    // 4) Scroll ile görünme animasyonu
+    // -----------------------------
+    const observer=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add("visible");
+          observer.unobserve(e.target);
+        }
+      })
+    },{threshold:.12});
+    document.querySelectorAll(".reveal").forEach(el=>observer.observe(el));
+
+    // -----------------------------
+    // 5) Birlikte geçen süre sayacı
+    // -----------------------------
+    const startInput=document.getElementById("startDate");
+    const savedDate=localStorage.getItem("ae-start-date");
+    if(savedDate) startInput.value=savedDate;
+
+    function updateCounter(){
+      const raw=startInput.value;
+      if(!raw) return;
+      const start=new Date(raw+"T00:00:00");
+      let diff=Math.max(0,Date.now()-start.getTime());
+      const sec=Math.floor(diff/1000);
+      document.getElementById("days").textContent=Math.floor(sec/86400).toLocaleString("tr-TR");
+      document.getElementById("hours").textContent=Math.floor((sec%86400)/3600);
+      document.getElementById("minutes").textContent=Math.floor((sec%3600)/60);
+      document.getElementById("seconds").textContent=sec%60;
+    }
+    startInput.addEventListener("change",()=>{
+      localStorage.setItem("ae-start-date",startInput.value);
+      updateCounter();
+      toast("Başlangıç tarihi kaydedildi ♥");
+    });
+    updateCounter(); setInterval(updateCounter,1000);
+
+    // -----------------------------
+    // 6) Fotoğraf kutuları
+    // -----------------------------
+    document.querySelectorAll(".photo input").forEach(input=>{
+      input.addEventListener("change",()=>{
+        const file=input.files?.[0];
+        if(!file) return;
+        const photo=input.closest(".photo");
+        const img=photo.querySelector("img");
+        img.src=URL.createObjectURL(file);
+        photo.classList.add("has-img");
+        toast("Fotoğraf eklendi. Güzel seçim ♥");
+      });
+    });
+
+    // -----------------------------
+    // 7) Modal mesajları
+    // -----------------------------
+    const modal=document.getElementById("modal");
+    const modalEmoji=document.getElementById("modalEmoji");
+    const modalTitle=document.getElementById("modalTitle");
+    const modalText=document.getElementById("modalText");
+
+    const messages={
+      s1:["🌙","İyi geceler, Elif","Bugün nasıl geçmiş olursa olsun, günün son düşüncelerinden birinin seni çok seven bir Abdullah olduğunu bil. Uyu, dinlen; yarın yine birlikte güzelleştireceğimiz bir gün var."],
+      s2:["💌","Acil sevgi dozu","Şu an moralin düşükse tek görevin şu: kendine benim gözümden bakmayı dene. O zaman ne kadar güzel, özel ve değerli biri olduğunu biraz daha net görürsün."],
+      s3:["✨","Gelecekten küçük bir not","Bir gün bu sayfayı çok sonra yeniden açarsak, bugünkü halimize gülümseyelim. Çünkü şu anda henüz yaşayacağımız en güzel anıların çoğunu yaşamış bile değiliz."],
+      bad:["☁️","Bugün zor geçtiyse…","Bugün her şeyi çözmek zorunda değilsin. Biraz dinlen, biraz nefes al ve şunu hatırla: kötü bir gün, kötü bir hayat demek değildir. Ben yanındayım."],
+      miss:["🥹","Beni özlediğinde","Ekrana biraz yaklaş. Şimdi hayal et: sana sarılıyorum ve 'ben de seni özledim Elif' diyorum. Gerçek sarılmanın yerini tutmaz ama sıra ona da gelecek."],
+      laugh:["😂","Gülmek istediğinde","Abdullah tarafından yapılan çok ciddi bir bilimsel araştırmaya göre Elif gülünce ortamın güzellik seviyesi %847 artıyor. Kaynak: Abdullah. Hakemli dergi: Kalbim."],
+      doubt:["🫶","Kendinden şüphe ettiğinde","Sen yalnızca başarıların kadar değerli değilsin. Yorulduğunda, hata yaptığında, hiçbir şey yapmak istemediğinde de aynı Elif'sin. Ve ben o Elif'i de seviyorum."]
+    };
+
+    function showModal(key){
+      const [emoji,title,text]=messages[key];
+      modalEmoji.textContent=emoji;
+      modalTitle.textContent=title;
+      modalText.textContent=text;
+      modal.classList.add("show");
+      burst(window.innerWidth/2,window.innerHeight/2,14);
+    }
+    document.querySelectorAll("[data-modal]").forEach(b=>b.onclick=()=>showModal(b.dataset.modal));
+    document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>showModal(b.dataset.open));
+    document.getElementById("modalClose").onclick=()=>modal.classList.remove("show");
+    modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
+
+    // -----------------------------
+    // 8) Rastgele romantik cümle
+    // -----------------------------
+    const loveLines=[
+      "Elif, bugün de en sevdiğim tesadüfsün.",
+      "Bazen ev dediğin şey bir yer değil, bir insandır.",
+      "Seninle konuşmak, günün en sevdiğim kısmı olabilir.",
+      "Dünyada milyarlarca insan var; benim cümlem yine sana çıkıyor.",
+      "En güzel plan: sen + ben + biraz zaman.",
+      "Sana alışmadım; seni her gün biraz daha sevdim.",
+      "Birlikteyken zaman hızlı, özleyince yavaş."
+    ];
+    document.getElementById("randomLove").onclick=()=>{
+      const line=loveLines[Math.floor(Math.random()*loveLines.length)];
+      toast(line,3300); burst(window.innerWidth/2,window.innerHeight*.55,18);
+    };
+
+    // -----------------------------
+    // 9) Kalp sırrı — 7 tık
+    // -----------------------------
+    let heartClicks=0;
+    document.getElementById("heartSecret").onclick=(e)=>{
+      heartClicks++;
+      const r=e.currentTarget.getBoundingClientRect();
+      burst(r.left+r.width/2,r.top+r.height/2,10);
+      if(heartClicks<7) toast(`Kalp ${heartClicks}/7… devam et ♥`,900);
+      if(heartClicks===7){
+        document.getElementById("secretOverlay").classList.add("show");
+        fireworks();
       }
     };
-    play();
-  });
+    document.getElementById("closeSecret").onclick=()=>document.getElementById("secretOverlay").classList.remove("show");
 
-  // Parıltılar
-  const sparkles = document.getElementById('sparkles');
-  for(let i=0;i<34;i++){
-    const s = document.createElement('span');
-    s.className = 'sparkle';
-    s.style.left = (2 + Math.random()*96) + '%';
-    s.style.top = (4 + Math.random()*82) + '%';
-    s.style.setProperty('--d', (1.7 + Math.random()*3.2) + 's');
-    s.style.setProperty('--delay', (-Math.random()*4) + 's');
-    const scale = .55 + Math.random()*.85;
-    s.style.transform = `scale(${scale})`;
-    sparkles.appendChild(s);
-  }
+    // Klavyeden "elif" yazılırsa ikinci easter egg
+    let typed="";
+    window.addEventListener("keydown",e=>{
+      if(e.key.length===1){
+        typed=(typed+e.key.toLowerCase()).slice(-4);
+        if(typed==="elif"){
+          toast("Gizli kelime bulundu: ELİF ♥",2500);
+          fireworks();
+        }
+      }
+      if(e.key==="Escape"){
+        modal.classList.remove("show");
+        document.getElementById("secretOverlay").classList.remove("show");
+      }
+    });
 
-  // Sürekli dolaşan kalpler
-  const hearts = document.getElementById('floatingHearts');
-  for(let i=0;i<18;i++){
-    const h = document.createElement('span');
-    h.className = 'heart';
-    h.style.left = (2 + Math.random()*96) + '%';
-    h.style.setProperty('--dur', (6 + Math.random()*6) + 's');
-    h.style.setProperty('--delay', (-Math.random()*10) + 's');
-    h.style.setProperty('--drift', (-55 + Math.random()*110) + 'px');
-    const size = 9 + Math.random()*12;
-    h.style.width = h.style.height = size + 'px';
-    hearts.appendChild(h);
-  }
+    // -----------------------------
+    // 10) Fare imlecinde mini kalpler
+    // -----------------------------
+    let lastTrail=0;
+    window.addEventListener("pointermove",e=>{
+      const now=performance.now();
+      if(now-lastTrail<90) return;
+      lastTrail=now;
+      if(Math.random()<.65){
+        const s=document.createElement("span");
+        s.className="cursor-heart";
+        s.textContent=Math.random()>.3?"♥":"✦";
+        s.style.left=e.clientX+"px"; s.style.top=e.clientY+"px";
+        s.style.color=Math.random()>.35?"#ff78ad":"#c894ff";
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),900);
+      }
+    });
 
-  restartAuto();
-})();
-</script>
+    // -----------------------------
+    // 11) Konfeti / kalp patlaması
+    // -----------------------------
+    function burst(x,y,count=20){
+      for(let i=0;i<count;i++){
+        const p=document.createElement("span");
+        p.textContent=Math.random()>.28?"♥":"✦";
+        p.style.position="fixed";
+        p.style.left=x+"px";p.style.top=y+"px";p.style.zIndex=180;p.style.pointerEvents="none";
+        p.style.color=Math.random()>.35?"#ff5d99":"#ffd0e2";
+        p.style.fontSize=(9+Math.random()*15)+"px";
+        document.body.appendChild(p);
+        const a=Math.random()*Math.PI*2, dist=60+Math.random()*150;
+        const dx=Math.cos(a)*dist,dy=Math.sin(a)*dist-40;
+        p.animate([
+          {transform:"translate(-50%,-50%) scale(.4) rotate(0deg)",opacity:1},
+          {transform:`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.1) rotate(${Math.random()*360}deg)`,opacity:0}
+        ],{duration:900+Math.random()*900,easing:"cubic-bezier(.2,.8,.2,1)"});
+        setTimeout(()=>p.remove(),1900);
+      }
+    }
+    function fireworks(){
+      const spots=[
+        [innerWidth*.2,innerHeight*.3],
+        [innerWidth*.8,innerHeight*.28],
+        [innerWidth*.5,innerHeight*.45],
+        [innerWidth*.28,innerHeight*.7],
+        [innerWidth*.72,innerHeight*.68]
+      ];
+      spots.forEach((s,i)=>setTimeout(()=>burst(s[0],s[1],35),i*220));
+    }
+
+    // -----------------------------
+    // 12) Kazı-kazan alanı
+    // -----------------------------
+    const canvas=document.getElementById("scratchCanvas");
+    const zone=document.getElementById("scratchZone");
+    const ctx=canvas.getContext("2d");
+    let scratching=false;
+
+    function setupScratch(){
+      const rect=zone.getBoundingClientRect();
+      const dpr=Math.min(devicePixelRatio||1,2);
+      canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      const g=ctx.createLinearGradient(0,0,rect.width,rect.height);
+      g.addColorStop(0,"#743c61");g.addColorStop(.5,"#b8688d");g.addColorStop(1,"#5b2a51");
+      ctx.fillStyle=g;ctx.fillRect(0,0,rect.width,rect.height);
+      ctx.fillStyle="rgba(255,255,255,.88)";
+      ctx.textAlign="center";ctx.font="700 18px system-ui";
+      ctx.fillText("BURAYI KAZI ♥",rect.width/2,rect.height/2);
+    }
+    function scratchAt(e){
+      const rect=canvas.getBoundingClientRect();
+      const x=e.clientX-rect.left,y=e.clientY-rect.top;
+      ctx.save();ctx.globalCompositeOperation="destination-out";
+      ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.fill();
+      ctx.restore();
+    }
+    canvas.addEventListener("pointerdown",e=>{scratching=true;canvas.setPointerCapture(e.pointerId);scratchAt(e)});
+    canvas.addEventListener("pointermove",e=>{if(scratching)scratchAt(e)});
+    canvas.addEventListener("pointerup",()=>scratching=false);
+    canvas.addEventListener("pointercancel",()=>scratching=false);
+    setupScratch();
+    window.addEventListener("resize",setupScratch);
+
+    // -----------------------------
+    // 13) Aşk çarkı
+    // -----------------------------
+    const wheel=document.getElementById("wheel");
+    const wheelText=document.getElementById("wheelText");
+    const wheelChoices=[
+      "Birlikte kahve ☕","Uzun yürüyüş 🌙","Film gecesi 🎬",
+      "Tatlı kaçamağı 🍰","Bol bol sarılma 🫂","Sürpriz plan ✨"
+    ];
+    let rotation=0;
+    document.getElementById("spinBtn").onclick=()=>{
+      const choice=wheelChoices[Math.floor(Math.random()*wheelChoices.length)];
+      rotation+=1080+Math.floor(Math.random()*720);
+      wheel.style.transform=`rotate(${rotation}deg)`;
+      wheelText.style.opacity=.25;
+      setTimeout(()=>{
+        wheelText.textContent=choice;
+        wheelText.style.opacity=1;
+        toast("Karar verildi: "+choice,2600);
+        const r=wheel.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height/2,20);
+      },2600);
+    };
+
+    // -----------------------------
+    // 14) Tıkla çalan minimal romantik melodi
+    // Web Audio kullandığı için harici müzik dosyası gerekmez.
+    // -----------------------------
+    let audioCtx=null, musicTimer=null, musicOn=false, noteIndex=0;
+    const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23,440,523.25,440,349.23];
+    function playNote(freq){
+      if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      const osc=audioCtx.createOscillator();
+      const gain=audioCtx.createGain();
+      const filter=audioCtx.createBiquadFilter();
+      osc.type="sine";osc.frequency.value=freq;
+      filter.type="lowpass";filter.frequency.value=1300;
+      gain.gain.setValueAtTime(.0001,audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.045,audioCtx.currentTime+.04);
+      gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.7);
+      osc.connect(filter);filter.connect(gain);gain.connect(audioCtx.destination);
+      osc.start();osc.stop(audioCtx.currentTime+.72);
+    }
+    function musicTick(){playNote(notes[noteIndex++%notes.length]);}
+    document.getElementById("musicBtn").onclick=()=>{
+      musicOn=!musicOn;
+      const btn=document.getElementById("musicBtn");
+      if(musicOn){
+        musicTick();musicTimer=setInterval(musicTick,520);btn.textContent="♪";
+        toast("Küçük melodi açıldı ♪");
+      }else{
+        clearInterval(musicTimer);btn.textContent="♫";toast("Melodi kapatıldı");
+      }
+    };
+
+    // -----------------------------
+    // 15) Toast
+    // -----------------------------
+    let toastTimer;
+    function toast(text,time=2200){
+      const t=document.getElementById("toast");
+      clearTimeout(toastTimer);
+      t.textContent=text;t.classList.add("show");
+      toastTimer=setTimeout(()=>t.classList.remove("show"),time);
+    }
+  </script>
 </body>
 </html>
+'''
+
+path = Path("/mnt/data/abdullah_elif_romantik_site.html")
+path.write_text(html, encoding="utf-8")
+print(f"Dosya oluşturuldu: {path}")
+print(f"Boyut: {path.stat().st_size/1024:.1f} KB")
